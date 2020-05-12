@@ -17,13 +17,23 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
+def get_upload_folder(domain_id):
+    base_folder = os.environ.get('INFOSYSTEM_FILE_DIR', UPLOAD_FOLDER)
+    working_directory = os.getcwd()
+    folder = os.path.join(working_directory, base_folder, domain_id)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder
+
+
 class Create(operation.Create):
 
-    def pre(self, session, **kwargs):
-        # TODO(samueldmq): replace with proper domain_id
-        self.domain_id = self.manager.api.domains.list(name='default')[0].id
+    def __call__(self, file, domain_id, **kwargs):
+        self.file = file
+        self.domain_id = domain_id
+        return super().__call__(**kwargs)
 
-        self.file = flask.request.files.get('file', None)
+    def pre(self, session, **kwargs):
         if self.file and allowed_file(self.file.filename):
             filename = werkzeug_utils.secure_filename(self.file.filename)
             self.entity = self.driver.instantiate(
@@ -37,11 +47,10 @@ class Create(operation.Create):
         return self.entity.is_stable()
 
     def do(self, session, **kwargs):
-        folder = os.path.join(UPLOAD_FOLDER, self.domain_id)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        self.file.save(os.path.join(folder, self.entity.name))
-        super().do(session)
+        folder = get_upload_folder(self.domain_id)
+        self.file.save(os.path.join(folder, self.entity.filename))
+        entity = super().do(session)
+        return entity
 
 
 class Get(operation.Get):
@@ -49,8 +58,8 @@ class Get(operation.Get):
     def do(self, session, **kwargs):
         file = super().do(session, **kwargs)
 
-        folder = os.path.join(UPLOAD_FOLDER, file.domain_id)
-        return flask.send_from_directory(folder, file.name)
+        folder = get_upload_folder(file.domain_id)
+        return flask.send_from_directory(folder, file.filename)
 
 
 class Manager(manager.Manager):
