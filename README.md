@@ -2,6 +2,6 @@
 
 # infosystem
 
-infosystem is a simple framework for writing RESTFul services.
+## infosystem is a simple framework for writing RESTFul services.
 
 Documentation for users, operators and developers is in [readthedocs](https://infosystem.readthedocs.io)
