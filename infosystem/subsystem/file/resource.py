@@ -22,3 +22,12 @@ class File(entity.Entity, db.Model):
                          updated_at, updated_by, tag)
         self.domain_id = domain_id
         self.name = name
+
+    @property
+    def extension(self):
+        name = self.name.split('.')
+        return name[-1]
+
+    @property
+    def filename(self):
+        return '{}.{}'.format(self.id, self.extension)
