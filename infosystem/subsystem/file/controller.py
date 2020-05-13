@@ -38,7 +38,7 @@ class Controller(controller.Controller):
         domain_id = self.get_domain_id_from_token(token)
         return domain_id
 
-    def create(self):
+    def create(self, **kwargs):
         # TODO(samueldmq): the file should be extracted here.
         # the todo above would be resolved too with this!
         try:
@@ -46,12 +46,20 @@ class Controller(controller.Controller):
             if not file:
                 return get_bad_request('file é obrigatório')
 
-            domain_id = self.get_domain_id()
+            token = self.get_token(self.get_token_id())
+            domain_id = self.get_domain_id_from_token(token)
             if not domain_id:
                 return get_bad_request(
                     'Não foi possível determinar o domain_id')
 
-            entity = self.manager.create(file=file, domain_id=domain_id)
+            user_id = token.user_id
+            if not user_id:
+                return get_bad_request(
+                    'Não foi possível determinar o user')
+
+            kwargs['domain_id'] = domain_id
+            kwargs['user_id'] = user_id
+            entity = self.manager.create(file=file, **kwargs)
         except exception.InfoSystemException as exc:
             return flask.Response(response=exc.message,
                                   status=exc.status)
