@@ -1,4 +1,5 @@
 from enum import Enum
+from decimal import Decimal
 from datetime import datetime
 
 from infosystem.database import db
@@ -64,6 +65,12 @@ class Entity(object):
 
         return dateTime
 
+    def convert_numeric(self, value):
+        if str(value).find('.') > -1:
+            return float(value.real)
+        else:
+            return int(value)
+
     def to_dict(self, include_dict=None, stringify=True):
         d = {}
 
@@ -72,6 +79,8 @@ class Entity(object):
             if value is not None:
                 if isinstance(value, Enum):
                     d[attr] = value.name
+                elif isinstance(value, Decimal):
+                    d[attr] = self.convert_numeric(value)
                 else:
                     d[attr] = value
                 # TODO(fdoliveira) Why change format of date and datetime?
