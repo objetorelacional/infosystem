@@ -114,7 +114,8 @@ class Entity(object):
                     d[key] = [part.to_dict(value) for part in thing]
                 else:
                     try:
-                        d[key] = thing.to_dict(value)
+                        if thing is not None:
+                            d[key] = thing.to_dict(value)
                     except AssertionError:
                         # filter mismatch, re-raise to ignore current entity
                         raise
