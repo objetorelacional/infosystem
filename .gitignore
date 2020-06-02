@@ -65,6 +65,7 @@ target/
 
 # Visual Studio Code
 .vscode
+.devcontainer
 
 # SQL Scripts Tests
 app.db
