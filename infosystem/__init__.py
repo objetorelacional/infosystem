@@ -6,6 +6,7 @@ from infosystem import database
 from infosystem import request
 from infosystem import subsystem as subsystem_module
 from infosystem import scheduler
+from infosystem import celery
 
 
 POLICYLESS_ROUTES = [
@@ -154,3 +155,6 @@ class System(flask.Flask):
         with self.app_context():
             if not self.subsystems['domains'].manager.list():
                 self.create_default_domain()
+
+    def init_celery(self):
+        celery.init_celery(self)

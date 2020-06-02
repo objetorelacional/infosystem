@@ -1,6 +1,8 @@
 import flask
+from typing import Any
 from pika import BlockingConnection, PlainCredentials, \
                  ConnectionParameters, BasicProperties
+from infosystem.celery import celery
 
 
 class RabbitMQ:
@@ -54,3 +56,13 @@ class ProducerQueue:
     def close(self):
         self.channel.close()
         self.connection.close()
+
+
+@celery.task
+def publish_body_priority(exchange: str,
+                          priority: int,
+                          body: Any,
+                          routing_key: str = '',
+                          type: str = 'topic') -> None:
+    publish = ProducerQueue(exchange, type)
+    publish.publish_body_priority(routing_key, body, priority)
