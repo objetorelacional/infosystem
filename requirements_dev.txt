@@ -1,0 +1,9 @@
+# System
+apscheduler
+flask
+flask-sqlalchemy
+flask-rbac
+gabbi
+pika
+sparkpost
+celery==4.4.3
