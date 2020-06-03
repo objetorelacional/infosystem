@@ -6,3 +6,4 @@ flask-rbac
 gabbi
 pika
 sparkpost
+celery
