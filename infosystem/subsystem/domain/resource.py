@@ -9,7 +9,9 @@ class Domain(entity.Entity, db.Model):
 
     name = db.Column(db.String(60), nullable=False, unique=True)
     parent_id = db.Column(
-        db.CHAR(32), db.ForeignKey("domain.id"), nullable=True)
+        db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=True)
+
+    __table_args__ = {'schema': 'infosystem'}
 
     def __init__(self, id, name, parent_id=None,
                  active=True, created_at=None, created_by=None,

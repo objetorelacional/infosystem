@@ -9,7 +9,7 @@ class Role(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     domain_id = db.Column(
-        db.CHAR(32), db.ForeignKey("domain.id"), nullable=False)
+        db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=False)
     name = db.Column(db.String(80), nullable=False)
 
     __table_args__ = (

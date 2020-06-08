@@ -9,7 +9,7 @@ class Tag(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     domain_id = db.Column(
-        db.CHAR(32), db.ForeignKey('domain.id'), nullable=False)
+        db.CHAR(32), db.ForeignKey('infosystem.domain.id'), nullable=False)
     name = db.Column(db.String(60), nullable=False)
     color = db.Column(db.CHAR(7), nullable=False)
     description = db.Column(db.String(1024), nullable=False)

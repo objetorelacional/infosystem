@@ -11,7 +11,7 @@ class Capability(entity.Entity, db.Model):
     route_id = db.Column(
         db.CHAR(32), db.ForeignKey("route.id"), nullable=False)
     domain_id = db.Column(
-        db.CHAR(32), db.ForeignKey("domain.id"), nullable=False)
+        db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=False)
 
     __table_args__ = (
         UniqueConstraint('route_id', 'domain_id', name='capability_uk'),)

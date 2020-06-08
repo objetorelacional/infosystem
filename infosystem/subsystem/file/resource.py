@@ -12,7 +12,7 @@ class File(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     domain_id = db.Column(
-        db.CHAR(32), db.ForeignKey("domain.id"), nullable=True)
+        db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=True)
     name = db.Column(db.String(255), nullable=True)
 
     def __init__(self, id, domain_id, name,
