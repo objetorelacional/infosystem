@@ -8,7 +8,8 @@ class Token(entity.Entity, db.Model):
     attributes = ['user_id']
     attributes += entity.Entity.attributes
 
-    user_id = db.Column(db.CHAR(32), db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(
+        db.CHAR(32), db.ForeignKey("infosystem.user.id"), nullable=False)
 
     __table_args__ = {'schema': 'infosystem'}
 

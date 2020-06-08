@@ -8,7 +8,8 @@ class Grant(entity.Entity, db.Model):
     attributes = ['user_id', 'role_id']
     attributes += entity.Entity.attributes
 
-    user_id = db.Column(db.CHAR(32), db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(
+        db.CHAR(32), db.ForeignKey("infosystem.user.id"), nullable=False)
     user = orm.relationship("User", backref=orm.backref('grants'))
     role_id = db.Column(db.CHAR(32),
                         db.ForeignKey("infosystem.role.id"),

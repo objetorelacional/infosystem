@@ -18,10 +18,12 @@ class User(entity.Entity, db.Model):
     password = db.Column(db.String(64), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('name', 'domain_id', name='user_name_domain_id_uk'),)
+        UniqueConstraint('name', 'domain_id', name='user_name_domain_id_uk'),
+        {'schema': 'infosystem'})
     __table_args__ = (
         UniqueConstraint(
-            'email', 'domain_id', name='user_email_domain_id_uk'),)
+            'email', 'domain_id', name='user_email_domain_id_uk'),
+        {'schema': 'infosystem'})
 
     def __init__(self, id, domain_id, name, email, password=uuid.uuid4().hex,
                  active=True, created_at=None, created_by=None,

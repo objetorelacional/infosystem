@@ -9,7 +9,7 @@ class Notification(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     user_id = db.Column(
-        db.CHAR(32), db.ForeignKey("user.id"), nullable=False)
+        db.CHAR(32), db.ForeignKey("infosystem.user.id"), nullable=False)
     date = db.Column(db.Date, nullable=False)
     subject = db.Column(db.String(50), nullable=False)
     body = db.Column(db.String(250), nullable=False)
