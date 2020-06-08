@@ -72,4 +72,3 @@ class Controller(controller.Controller):
 
     def get(self, id):
         return self.manager.get(id=id)
-

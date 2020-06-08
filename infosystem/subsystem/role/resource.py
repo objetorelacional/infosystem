@@ -14,7 +14,7 @@ class Role(entity.Entity, db.Model):
 
     __table_args__ = (
         UniqueConstraint('domain_id', 'name', name='role_name_uk'),
-        { 'schema': 'infosystem'})
+        {'schema': 'infosystem'})
 
     def __init__(self, id, domain_id, name,
                  active=True, created_at=None, created_by=None,
