@@ -9,7 +9,7 @@ class Capability(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     route_id = db.Column(
-        db.CHAR(32), db.ForeignKey("route.id"), nullable=False)
+        db.CHAR(32), db.ForeignKey("infosystem.route.id"), nullable=False)
     domain_id = db.Column(
         db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=False)
 

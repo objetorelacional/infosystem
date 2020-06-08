@@ -14,7 +14,8 @@ class Route(entity.Entity, db.Model):
     bypass = db.Column(db.Boolean(), nullable=False)
     sysadmin = db.Column(db.Boolean(), nullable=False)
 
-    __table_args__ = (UniqueConstraint('url', 'method', name='route_uk'),)
+    __table_args__ = (UniqueConstraint('url', 'method', name='route_uk'),
+                      {'schema': 'infosystem'})
 
     def __init__(self, id, name, url, method, bypass=False, sysadmin=False,
                  active=True, created_at=None, created_by=None,
