@@ -15,7 +15,8 @@ class Tag(entity.Entity, db.Model):
     description = db.Column(db.String(1024), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('domain_id', 'name', name='tag_domain_id_name_uk'),)
+        UniqueConstraint('domain_id', 'name', name='tag_domain_id_name_uk'),
+        {'schema': 'infosystem'})
 
     def __init__(self, id, domain_id, name, color, description,
                  active=True, created_at=None, created_by=None,
