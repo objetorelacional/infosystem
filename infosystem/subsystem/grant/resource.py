@@ -13,6 +13,8 @@ class Grant(entity.Entity, db.Model):
     role_id = db.Column(db.CHAR(32), db.ForeignKey("role.id"), nullable=False)
     role = orm.relationship("Role", backref=orm.backref('grants'))
 
+    __table_args__ = {'schema': 'infosystem'}
+
     def __init__(self, id, user_id, role_id,
                  active=True, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
