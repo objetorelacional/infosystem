@@ -10,6 +10,8 @@ class Token(entity.Entity, db.Model):
 
     user_id = db.Column(db.CHAR(32), db.ForeignKey("user.id"), nullable=False)
 
+    __table_args__ = {'schema': 'infosystem'}
+
     def __init__(self, id, user_id, active=True, created_at=datetime.now(),
                  created_by=user_id, updated_at=None,
                  updated_by=None, tag=None):
