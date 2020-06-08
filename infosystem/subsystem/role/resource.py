@@ -13,7 +13,8 @@ class Role(entity.Entity, db.Model):
     name = db.Column(db.String(80), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('domain_id', 'name', name='role_name_uk'),)
+        UniqueConstraint('domain_id', 'name', name='role_name_uk'),
+        { 'schema': 'infosystem'})
 
     def __init__(self, id, domain_id, name,
                  active=True, created_at=None, created_by=None,

@@ -10,7 +10,9 @@ class Grant(entity.Entity, db.Model):
 
     user_id = db.Column(db.CHAR(32), db.ForeignKey("user.id"), nullable=False)
     user = orm.relationship("User", backref=orm.backref('grants'))
-    role_id = db.Column(db.CHAR(32), db.ForeignKey("role.id"), nullable=False)
+    role_id = db.Column(db.CHAR(32),
+                        db.ForeignKey("infosystem.role.id"),
+                        nullable=False)
     role = orm.relationship("Role", backref=orm.backref('grants'))
 
     __table_args__ = {'schema': 'infosystem'}

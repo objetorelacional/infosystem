@@ -9,7 +9,9 @@ class Policy(entity.Entity, db.Model):
 
     capability_id = db.Column(
         db.CHAR(32), db.ForeignKey("infosystem.capability.id"), nullable=False)
-    role_id = db.Column(db.CHAR(32), db.ForeignKey("role.id"), nullable=False)
+    role_id = db.Column(db.CHAR(32),
+                        db.ForeignKey("infosystem.role.id"),
+                        nullable=False)
 
     __table_args__ = {'schema': 'infosystem'}
 
