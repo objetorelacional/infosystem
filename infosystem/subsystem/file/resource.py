@@ -15,6 +15,8 @@ class File(entity.Entity, db.Model):
         db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=True)
     name = db.Column(db.String(255), nullable=True)
 
+    __table_args__ = {'schema': 'infosystem'}
+
     def __init__(self, id, domain_id, name,
                  active=True, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
