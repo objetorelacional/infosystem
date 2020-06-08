@@ -8,7 +8,7 @@ class Policy(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     capability_id = db.Column(
-        db.CHAR(32), db.ForeignKey("capability.id"), nullable=False)
+        db.CHAR(32), db.ForeignKey("infosystem.capability.id"), nullable=False)
     role_id = db.Column(db.CHAR(32), db.ForeignKey("role.id"), nullable=False)
 
     def __init__(self, id, capability_id, role_id,

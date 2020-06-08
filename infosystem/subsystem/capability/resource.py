@@ -14,7 +14,8 @@ class Capability(entity.Entity, db.Model):
         db.CHAR(32), db.ForeignKey("infosystem.domain.id"), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('route_id', 'domain_id', name='capability_uk'),)
+        UniqueConstraint('route_id', 'domain_id', name='capability_uk'),
+        {'schema': 'infosystem'})
 
     def __init__(self, id, route_id, domain_id,
                  active=True, created_at=None, created_by=None,
