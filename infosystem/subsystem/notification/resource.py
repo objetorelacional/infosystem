@@ -15,6 +15,8 @@ class Notification(entity.Entity, db.Model):
     body = db.Column(db.String(250), nullable=False)
     read_date = db.Column(db.Date, nullable=True)
 
+    __table_args__ = {'schema': 'infosystem'}
+
     def __init__(self, id, user_id, date, subject, body, active=True,
                  read_date=None, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
