@@ -11,7 +11,7 @@ class Application(entity.Entity, db.Model):
     name = db.Column(db.String(30), nullable=False)
     description = db.Column(db.String(1000), nullable=False)
 
-    __table_args__ = (UniqueConstraint('name', name='application_uk'),)
+    __table_args__ = (UniqueConstraint('name', name='application_name_uk'),)
 
     def __init__(self, id, name, description,
                  active=True, created_at=None, created_by=None,
