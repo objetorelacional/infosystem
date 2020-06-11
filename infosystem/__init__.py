@@ -93,7 +93,7 @@ class System(flask.Flask):
         for subsystem in self.subsystems.values():
             subsystem.router.controller.manager.api = api
 
-    def register_all_routes(self, default_domain_id, sysadmin_role_id):
+    def register_all_routes(self, default_application_id, sysadmin_role_id):
         # Register all system routes and all non-admin
         # routes as capabilities in the default domain
         for subsystem in self.subsystems.values():
@@ -114,7 +114,8 @@ class System(flask.Flask):
                 if not route_ref.sysadmin:
                     cap_mng = self.subsystems['capabilities'].manager
                     capability = cap_mng.create(
-                        domain_id=default_domain_id, route_id=route_ref.id)
+                        application_id=default_application_id,
+                        route_id=route_ref.id)
                     # TODO(fdoliveira) define why BYPASS atribute for URLs
                     # if (route_ref.method, route_ref.url) not in \
                     #        POLICYLESS_ROUTES:
@@ -122,10 +123,15 @@ class System(flask.Flask):
                         capability_id=capability.id,
                         role_id=sysadmin_role_id)
 
-    def create_default_domain(self):
+    def create_default_application(self):
+        default_application = self.subsystems['applications'].manager.create(
+            name='default', description='Application Default')
+        return default_application
+
+    def create_default_domain(self, default_application_id):
         # Create DEFAULT domain
         default_domain = self.subsystems['domains'].manager.create(
-            name='default')
+            name='default', application_id=default_application_id)
 
         # Create SYSDAMIN role
         sysadmin_role = self.subsystems['roles'].manager.create(
@@ -141,7 +147,7 @@ class System(flask.Flask):
         self.subsystems['grants'].manager.create(
             user_id=sysadmin_user.id, role_id=sysadmin_role.id)
 
-        self.register_all_routes(default_domain.id, sysadmin_role.id)
+        self.register_all_routes(default_application_id, sysadmin_role.id)
 
     def bootstrap(self):
         """Bootstrap the system.
@@ -153,8 +159,10 @@ class System(flask.Flask):
         """
 
         with self.app_context():
-            if not self.subsystems['domains'].manager.list():
-                self.create_default_domain()
+            if not self.subsystems['applications'].manager.list():
+                default_application = self.create_default_application()
+                if not self.subsystems['domains'].manager.list():
+                    self.create_default_domain(default_application.id)
 
     def init_celery(self):
         celery.init_celery(self)
