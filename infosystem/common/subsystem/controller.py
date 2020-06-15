@@ -1,7 +1,6 @@
 import flask
-import json
 
-from infosystem.common import exception
+from infosystem.common import exception, utils
 # TODO(samueldmq): find a better name to this
 # from infosystem.common.subsystem import manager as m
 
@@ -102,7 +101,7 @@ class Controller(object):
 
         response = {self.resource_wrap: entity.to_dict()}
 
-        return flask.Response(response=json.dumps(response, default=str),
+        return flask.Response(response=utils.to_json(response),
                               status=201,
                               mimetype="application/json")
 
@@ -119,7 +118,7 @@ class Controller(object):
 
         response = {self.resource_wrap: entity_dict}
 
-        return flask.Response(response=json.dumps(response, default=str),
+        return flask.Response(response=utils.to_json(response),
                               status=200,
                               mimetype="application/json")
 
@@ -149,7 +148,7 @@ class Controller(object):
 
         response = {self.collection_wrap: collection}
 
-        return flask.Response(response=json.dumps(response, default=str),
+        return flask.Response(response=utils.to_json(response),
                               status=200,
                               mimetype="application/json")
 
@@ -164,7 +163,7 @@ class Controller(object):
 
         response = {self.resource_wrap: entity.to_dict()}
 
-        return flask.Response(response=json.dumps(response, default=str),
+        return flask.Response(response=utils.to_json(response),
                               status=200,
                               mimetype="application/json")
 
