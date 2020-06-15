@@ -135,7 +135,7 @@ class System(flask.Flask):
 
         # Create SYSDAMIN role
         sysadmin_role = self.subsystems['roles'].manager.create(
-            name='sysadmin', domain_id=default_domain.id)
+            name='sysadmin')
 
         # Create SYSADMIN user
         pass256 = hashlib.sha256(b"123456").hexdigest()
