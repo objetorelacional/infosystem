@@ -9,20 +9,16 @@ DATE_FMT = '%Y-%m-%d'
 DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
-def convert_date_from_str(value: Union[str, datetime]) -> Optional[datetime]:
+def convert_date_from_str(value: Optional[str]) -> Optional[datetime]:
     date_time = None
     if value is not None:
-        if type(value) is str:
-            try:
-                if len(value.strip()) == 10:
-                    date_time = datetime.strptime(value, DATE_FMT)
-                elif len(value.strip()) == 24:
-                    date_time = datetime.strptime(value, DATETIME_FMT)
-            except Exception:
-                pass
-        elif type(value) is datetime:
-            date_time = value
-
+        try:
+            if len(value.strip()) == 10:
+                date_time = datetime.strptime(value, DATE_FMT)
+            elif len(value.strip()) == 24:
+                date_time = datetime.strptime(value, DATETIME_FMT)
+        except Exception:
+            pass
     return date_time
 
 
