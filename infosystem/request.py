@@ -89,6 +89,11 @@ class RequestManager(object):
                 domain = self.subsystems['domains'].manager.get(
                     id=user.domain_id)
 
+                # TODO Checar domain
+                # 1 - sem domain seta o default obs: apenas o sysadmin pode
+                #       gravar no default
+                # 2 checar se o domain enviado corresponde ao do token
+
                 if not self.check_capability(route.id, domain.application_id):
                     return flask.Response(response=None, status=404)
 
