@@ -10,13 +10,9 @@ class Router(router.Router):
     def routes(self):
         return super().routes + [
             {
-                'action': 'createAdmin', 'method': 'POST',
-                'url': self.collection_url + '/createAdmin',
-                'callback': self.controller.createAdmin
-            },
-            {
-                'action': 'createWithGrantedResources', 'method': 'POST',
-                'url': self.collection_url + '/createWithGrantedResources',
-                'callback': self.controller.createWithGrantedResources
+                'action': 'createPolicies',
+                'method': 'POST',
+                'url': self.resource_url + '/policies',
+                'callback': self.controller.create_policies
             }
         ]
