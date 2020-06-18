@@ -1,6 +1,6 @@
 from infosystem.common import subsystem
-from infosystem.common.subsystem import controller, router
-from infosystem.subsystem.application import resource, manager
+from infosystem.subsystem.application import resource, manager, controller, \
+    router
 
 subsystem = subsystem.Subsystem(resource=resource.Application,
                                 manager=manager.Manager,
