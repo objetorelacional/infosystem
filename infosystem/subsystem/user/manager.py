@@ -159,8 +159,9 @@ class Routes(operation.Operation):
             p.capability_id for p in policies if p.role_id in user_roles_id]
 
         user = self.manager.api.users.list(id=user_id)[0]
+        domain = self.manager.api.domains.get(id=user.domain_id)
         capabilities = self.manager.api.capabilities.list(
-            domain_id=user.domain_id)
+            application_id=domain.application_id)
 
         policy_capabilities = [
             c for c in capabilities if c.id in policies_capabilitys_id]
