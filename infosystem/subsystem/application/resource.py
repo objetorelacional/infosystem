@@ -3,19 +3,20 @@ from sqlalchemy import UniqueConstraint
 from infosystem.common.subsystem import entity
 
 
-class Role(entity.Entity, db.Model):
+class Application(entity.Entity, db.Model):
 
-    attributes = ['name']
+    attributes = ['name', 'description']
     attributes += entity.Entity.attributes
 
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.String(30), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint('name', name='role_name_uk'),)
+    __table_args__ = (UniqueConstraint('name', name='application_name_uk'),)
 
-    def __init__(self, id, name,
+    def __init__(self, id, name, description,
                  active=True, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
         super().__init__(id, active, created_at, created_by,
                          updated_at, updated_by, tag)
         self.name = name
+        self.description = description

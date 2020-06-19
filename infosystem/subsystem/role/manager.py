@@ -1,75 +1,31 @@
-from infosystem.common import exception
 from infosystem.common.subsystem import manager
 from infosystem.common.subsystem import operation
 
 
-class CreateAdmin(operation.Operation):
+class CreatePolicies(operation.Operation):
 
-    def pre(self, **kwargs):
+    def pre(self, session, id: str, application_id: str, **kwargs):
+        self.role_id = id
+        self.application_id = application_id
 
-        self.domain_id = kwargs.get('domain_id')
+        return self.manager.api.applications.get(
+            id=application_id) is not None and self.driver.get(
+                id, session=session) is not None
 
-        if (self.domain_id is None):
-            raise exception.OperationBadRequest()
-
-        if self.manager.api.roles.list(name='admin'):
-            raise exception.OperationBadRequest()
-
-        return True
-
-    def do(self, session, **kwargs):
-        self.entity = self.manager.api.roles.create(
-            name='admin', domain_id=self.domain_id)
-
-        routes = self.manager.api.routes.list()
-
-        for route in routes:
-            if not route.sysadmin:
-                capability = self.manager.api.capabilities.list(
-                    domain_id=self.domain_id, route_id=route.id)
-                self.manager.api.policies.create(
-                    capability_id=capability[0].id, role_id=self.entity.id)
-
-        return self.entity
-
-
-class CreateWithGrantedResources(operation.Operation):
-
-    def pre(self, **kwargs):
-
-        self.domain_id = kwargs.get('domain_id')
-        self.name = kwargs.get('name')
-        self.tag = None
-        if 'tag' in kwargs:
-            self.tag = kwargs.get('tag')
-        self.granted_resources = kwargs.get('granted_resources')
-
-        if ((self.domain_id is None) or (self.name is None) or
-           (self.granted_resources is None)):
-            raise exception.OperationBadRequest()
-
-        return True
+    def _create_policy(self, role_id: str, capability_id: str) -> None:
+        self.manager.api.policies.create(role_id=role_id,
+                                         capability_id=capability_id)
 
     def do(self, session, **kwargs):
+        capabilities = self.manager.api.capabilities.list(
+            application_id=self.application_id)
 
-        self.entity = self.manager.api.roles.create(
-            name=self.name, domain_id=self.domain_id, tag=self.tag)
-
-        routes = self.manager.api.routes.list()
-
-        for route in routes:
-            if (not route.sysadmin) and (route.url in self.granted_resources):
-                capability = self.manager.api.capabilities.list(
-                    domain_id=self.domain_id, route_id=route.id)
-                self.manager.api.policies.create(
-                    capability_id=capability[0].id, role_id=self.entity.id)
-
-        return self.entity
+        for capability in capabilities:
+            self._create_policy(self.role_id, capability.id)
 
 
 class Manager(manager.Manager):
 
     def __init__(self, driver):
-        super(Manager, self).__init__(driver)
-        self.createAdmin = CreateAdmin(self)
-        self.createWithGrantedResources = CreateWithGrantedResources(self)
+        super().__init__(driver)
+        self.create_policies = CreatePolicies(self)

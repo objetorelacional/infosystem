@@ -65,9 +65,9 @@ class RequestManager(object):
                 domains = self.subsystems['domains'].manager.list(
                     name=data['domain_name'])
                 if domains:
-                    domain_id = domains[0].id
+                    application_id = domains[0].application_id
 
-                    if not self.check_capability(route.id, domain_id):
+                    if not self.check_capability(route.id, application_id):
                         return flask.Response(response=None, status=404)
                 else:
                     return flask.Response(response=None, status=400)
@@ -86,9 +86,15 @@ class RequestManager(object):
 
                 user = self.subsystems['users'].manager.list(
                     id=token.user_id)[0]
-                domain_id = user.domain_id
+                domain = self.subsystems['domains'].manager.get(
+                    id=user.domain_id)
 
-                if not self.check_capability(route.id, user.domain_id):
+                # TODO Checar domain
+                # 1 - sem domain seta o default obs: apenas o sysadmin pode
+                #       gravar no default
+                # 2 checar se o domain enviado corresponde ao do token
+
+                if not self.check_capability(route.id, domain.application_id):
                     return flask.Response(response=None, status=404)
 
                 # Now check the user grants
@@ -100,7 +106,7 @@ class RequestManager(object):
                 # so capabilities will be empty
                 # treat this case here once we support sysadmin
                 capability = self.subsystems['capabilities'].manager.list(
-                    route_id=route.id, domain_id=domain_id)[0]
+                    route_id=route.id, application_id=domain.application_id)[0]
 
                 policies = self.subsystems['policies'].manager.list(
                     capability_id=capability.id)
@@ -117,7 +123,7 @@ class RequestManager(object):
             else:
                 return flask.Response(response=None, status=401)
 
-    def check_capability(self, route_id, domain_id):
+    def check_capability(self, route_id, application_id):
         capabilities = self.subsystems['capabilities'].manager.list(
-            route_id=route_id, domain_id=domain_id)
+            route_id=route_id, application_id=application_id)
         return capabilities
