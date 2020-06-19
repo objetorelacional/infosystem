@@ -5,24 +5,24 @@ from infosystem.common.subsystem import entity
 
 class Capability(entity.Entity, db.Model):
 
-    attributes = ['route_id', 'domain_id']
+    attributes = ['route_id', 'application_id']
     attributes += entity.Entity.attributes
 
     route_id = db.Column(
         db.CHAR(32), db.ForeignKey("route.id"), nullable=False)
-    domain_id = db.Column(
-        db.CHAR(32), db.ForeignKey("domain.id"), nullable=False)
+    application_id = db.Column(
+        db.CHAR(32), db.ForeignKey("application.id"), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint('route_id', 'domain_id', name='capability_uk'),)
+        UniqueConstraint('route_id', 'application_id', name='capability_uk'),)
 
-    def __init__(self, id, route_id, domain_id,
+    def __init__(self, id, route_id, application_id,
                  active=True, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
         super().__init__(id, active, created_at, created_by,
                          updated_at, updated_by, tag)
         self.route_id = route_id
-        self.domain_id = domain_id
+        self.application_id = application_id
 
     @classmethod
     def collection(cls):
