@@ -1,5 +1,5 @@
 from infosystem.database import db
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, orm
 from infosystem.common.subsystem import entity
 
 
@@ -10,8 +10,11 @@ class Capability(entity.Entity, db.Model):
 
     route_id = db.Column(
         db.CHAR(32), db.ForeignKey("route.id"), nullable=False)
+    route = orm.relationship('Route', backref=orm.backref('capability_route'))
     application_id = db.Column(
         db.CHAR(32), db.ForeignKey("application.id"), nullable=False)
+    application = orm.relationship('Application', backref=orm.backref(
+        'capability_application'))
 
     __table_args__ = (
         UniqueConstraint('route_id', 'application_id', name='capability_uk'),)
