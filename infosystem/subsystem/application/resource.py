@@ -1,3 +1,4 @@
+from sqlalchemy import orm
 from infosystem.database import db
 from sqlalchemy import UniqueConstraint
 from infosystem.common.subsystem import entity
@@ -10,6 +11,8 @@ class Application(entity.Entity, db.Model):
 
     name = db.Column(db.String(30), nullable=False)
     description = db.Column(db.String(1000), nullable=False)
+    capabilities = orm.relationship('Capability', backref=orm.backref(
+        'application_capability'))
 
     __table_args__ = (UniqueConstraint('name', name='application_name_uk'),)
 

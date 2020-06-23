@@ -180,6 +180,36 @@ class Routes(operation.Operation):
         return list(set(user_routes).union(set(bypass_routes)))
 
 
+class UploadPhoto(operation.Update):
+
+    def pre(self, session, id, **kwargs):
+        kwargs.pop('password', None)
+        photo_id = kwargs.pop('photo_id', None)
+        self.entity = self.manager.get(id=id)
+        self.entity.photo_id = photo_id
+        return self.entity.is_stable()
+
+    def do(self, session, **kwargs):
+        return super().do(session=session)
+
+
+class DeletePhoto(operation.Update):
+
+    def pre(self, session, id, **kwargs):
+        kwargs.pop('password', None)
+        self.entity = self.manager.get(id=id)
+        self.photo_id = self.entity.photo_id
+        self.entity.photo_id = None
+        return self.entity.is_stable()
+
+    def do(self, session, **kwargs):
+        return super().do(session=session)
+
+    def post(self):
+        if self.photo_id:
+            self.manager.api.images.delete(id=self.photo_id)
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
@@ -189,3 +219,5 @@ class Manager(manager.Manager):
         self.restore = Restore(self)
         self.reset = Reset(self)
         self.routes = Routes(self)
+        self.upload_photo = UploadPhoto(self)
+        self.delete_photo = DeletePhoto(self)
