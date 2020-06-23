@@ -7,3 +7,4 @@ gabbi
 pika
 sparkpost
 celery==4.4.3
+pillow
