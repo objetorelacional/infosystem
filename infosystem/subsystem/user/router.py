@@ -17,5 +17,12 @@ class Router(router.Router):
                 'callback': self.controller.reset},
             {'action': 'routes', 'method': 'GET',
                 'url': self.collection_url + '/routes',
-                'callback': self.controller.routes}
+                'callback': self.controller.routes},
+
+            {'action': 'routes', 'method': 'PUT',
+                'url': self.resource_url + '/photo',
+                'callback': self.controller.upload_photo},
+            {'action': 'routes', 'method': 'DELETE',
+                'url': self.resource_url + '/photo',
+                'callback': self.controller.delete_photo}
         ]
