@@ -33,6 +33,8 @@ def convert_date_to_str(date_value: Union[date, datetime]) -> str:
 
 def convert_decimal(value: Decimal) -> Union[float, int]:
     if isinstance(value, Decimal):
+        if not value.is_finite():
+            return str(value)
         if str(value).find('.') > -1:
             return float(value.real)
         else:
