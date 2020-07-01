@@ -138,10 +138,12 @@ class System(flask.Flask):
             name='sysadmin')
 
         # Create SYSADMIN user
-        pass256 = hashlib.sha256(b"123456").hexdigest()
+        # pass256 = hashlib.sha256(b"123456").hexdigest()
         sysadmin_user = self.subsystems['users'].manager.create(
-            domain_id=default_domain.id, name='sysadmin', password=pass256,
+            domain_id=default_domain.id, name='sysadmin',  # password=pass256,
             email="sysadmin@example.com")
+        self.subsystems['users'].manager.reset(
+            id=sysadmin_user.id, password='123456')
 
         # Grant SYSADMIN role to SYSADMIN user
         self.subsystems['grants'].manager.create(

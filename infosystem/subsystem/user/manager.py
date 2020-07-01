@@ -1,6 +1,5 @@
 import os
 import hashlib
-import flask
 
 from sparkpost import SparkPost
 from infosystem.common import exception
@@ -63,38 +62,6 @@ def send_email(token_id, user, domain):
         pass
 
 
-class Create(operation.Create):
-
-    def pre(self, session, **kwargs):
-        password = kwargs.pop('password', None)
-        if password:
-            kwargs['password'] = self.manager.hash_password(password)
-        return super().pre(session, **kwargs)
-
-    # def do(self, session, **kwargs):
-        # self.entity = super().do(session, **kwargs)
-
-        # self.token = self.manager.api.tokens.create(
-        #     session=session, user=self.entity)
-
-        # self.domain = self.manager.api.domains.get(id=self.entity.domain_id)
-        # if not self.domain:
-        #     raise exception.OperationBadRequest()
-
-        # return self.entity
-
-    # def post(self):
-        # send_reset_password_email(self.token.id, self.entity, _RESET_URL)
-        # send_email(self.token.id, self.entity, self.domain)
-
-
-class Update(operation.Update):
-
-    def pre(self, session, **kwargs):
-        kwargs.pop('password', None)
-        return super().pre(session, **kwargs)
-
-
 class UpdatePassword(operation.Update):
 
     def _check_password(self, password, password_db):
@@ -107,13 +74,12 @@ class UpdatePassword(operation.Update):
         old_password = kwargs.pop('old_password', None)
         self.password = kwargs.pop('password', None)
 
-        if not id or not self.password:
+        if not (id and self.password and old_password):
             raise exception.BadRequest()
         super().pre(session=session, id=id)
 
-        if old_password:
-            if not self._check_password(old_password, self.entity.password):
-                raise exception.BadRequest()
+        if not self._check_password(old_password, self.entity.password):
+            raise exception.BadRequest()
         return True
 
     def do(self, session, **kwargs):
@@ -156,23 +122,19 @@ class Restore(operation.Operation):
         # send_email(token.id, self.user, self.domain)
 
 
-class Reset(operation.Operation):
+class Reset(operation.Update):
 
-    def pre(self, **kwargs):
-        self.token = flask.request.headers.get('token')
-        self.password = kwargs.get('password')
-
-        if not (self.token and self.password):
-            raise exception.OperationBadRequest()
+    def pre(self, session, id, **kwargs):
+        self.password = kwargs.get('password', None)
+        if not (id and self.password):
+            raise exception.BadRequest()
+        super().pre(session=session, id=id)
         return True
 
     def do(self, session, **kwargs):
-        token = self.manager.api.tokens.get(id=self.token)
-        self.manager.update_password(id=token.user_id,
-                                     password=self.password)
-
-    def post(self):
-        self.manager.api.tokens.delete(id=self.token)
+        self.entity.password = self.manager.hash_password(self.password)
+        self.entity = super().do(session)
+        return self.entity
 
 
 class Routes(operation.Operation):
@@ -266,8 +228,6 @@ class Manager(manager.Manager):
 
     def __init__(self, driver):
         super(Manager, self).__init__(driver)
-        self.create = Create(self)
-        self.update = Update(self)
         self.update_password = UpdatePassword(self)
         self.restore = Restore(self)
         self.reset = Reset(self)

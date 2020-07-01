@@ -49,22 +49,44 @@ class Controller(controller.Controller):
                               status=200,
                               mimetype="application/json")
 
-    def reset(self):
+    def reset_password(self, id):
         if not flask.request.is_json:
             return flask.Response(
                 response=exception.BadRequestContentType.message,
                 status=exception.BadRequestContentType.status)
 
         data = flask.request.get_json()
-
         try:
-            self.manager.reset(**data)
+            self.manager.reset(id=id, **data)
         except exception.InfoSystemException as exc:
             return flask.Response(response=exc.message,
                                   status=exc.status)
 
         return flask.Response(response=None,
-                              status=200,
+                              status=204,
+                              mimetype="application/json")
+
+    def reset_my_password(self):
+        if not flask.request.is_json:
+            return flask.Response(
+                response=exception.BadRequestContentType.message,
+                status=exception.BadRequestContentType.status)
+
+        data = flask.request.get_json()
+        try:
+
+            token = self.get_token(self.get_token_id())
+            if not token:
+                raise exception.BadRequest()
+
+            self.manager.reset(id=token.user_id, **data)
+            self.manager.api.tokens.delete(id=token.id)
+        except exception.InfoSystemException as exc:
+            return flask.Response(response=exc.message,
+                                  status=exc.status)
+
+        return flask.Response(response=None,
+                              status=204,
                               mimetype="application/json")
 
     def routes(self):
@@ -132,16 +154,16 @@ class Controller(controller.Controller):
     def update_password(self, id):
         data = flask.request.get_json()
         try:
-            # token = self.get_token(self.get_token_id())
+            token = self.get_token(self.get_token_id())
             password = data.get('password', None)
             old_password = data.get('old_password', None)
 
-            # if token.user_id != id:
-            #     error = exception.InfoSystemException()
-            #     error.status = 401
-            #     error.message = "Not Authorized"
-            #     raise error
-            if not password:
+            if token.user_id != id:
+                error = exception.InfoSystemException()
+                error.status = 401
+                error.message = "Not Authorized"
+                raise error
+            if not password or not old_password:
                 raise exception.BadRequest()
             self.manager.update_password(
                 id=id, password=password, old_password=old_password)
