@@ -1,8 +1,19 @@
+import enum
 import uuid
 from sqlalchemy import orm
 from infosystem.database import db
 from sqlalchemy import UniqueConstraint
 from infosystem.common.subsystem import entity
+
+
+class TypeEmail(enum.Enum):
+    USER_CREATED = 1
+    FORGET_PASSWORD = 2
+    UPDATED_PASSWORD = 3
+
+    @staticmethod
+    def value_of(value):
+        return TypeEmail.__members__.get(value, None)
 
 
 class User(entity.Entity, db.Model):
@@ -16,7 +27,8 @@ class User(entity.Entity, db.Model):
     name = db.Column(db.String(80), nullable=False)
     nickname = db.Column(db.String(80), nullable=True)
     email = db.Column(db.String(80), nullable=False)
-    password = db.Column(db.String(64), nullable=False)
+    password = db.Column(
+        db.String(64), nullable=False, default=uuid.uuid4().hex)
     photo_id = db.Column(db.CHAR(32), db.ForeignKey('image.id'), nullable=True)
 
     __table_args__ = (
@@ -24,7 +36,7 @@ class User(entity.Entity, db.Model):
         UniqueConstraint(
             'email', 'domain_id', name='user_email_domain_id_uk'),)
 
-    def __init__(self, id, domain_id, name, email, password=uuid.uuid4().hex,
+    def __init__(self, id, domain_id, name, email,
                  nickname=None, photo_id=None,
                  active=True, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
@@ -33,6 +45,6 @@ class User(entity.Entity, db.Model):
         self.domain_id = domain_id
         self.name = name
         self.email = email
-        self.password = password
+        # self.password = password
         self.nickname = nickname
         self.photo_id = photo_id
