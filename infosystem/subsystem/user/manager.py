@@ -6,6 +6,7 @@ from sparkpost import SparkPost
 from infosystem.common import exception
 from infosystem.common.subsystem import manager
 from infosystem.common.subsystem import operation
+from infosystem.subsystem.user.resource import TypeEmail
 
 _HTML_EMAIL_TEMPLATE = """
     <div style="width: 100%; text-align: center">
@@ -64,17 +65,23 @@ def send_email(token_id, user, domain):
 
 class Create(operation.Create):
 
-    def do(self, session, **kwargs):
-        self.entity = super().do(session, **kwargs)
+    def pre(self, session, **kwargs):
+        password = kwargs.pop('password', None)
+        if password:
+            kwargs['password'] = self.manager.hash_password(password)
+        return super().pre(session, **kwargs)
 
-        self.token = self.manager.api.tokens.create(
-            session=session, user=self.entity)
+    # def do(self, session, **kwargs):
+        # self.entity = super().do(session, **kwargs)
 
-        self.domain = self.manager.api.domains.get(id=self.entity.domain_id)
-        if not self.domain:
-            raise exception.OperationBadRequest()
+        # self.token = self.manager.api.tokens.create(
+        #     session=session, user=self.entity)
 
-        return self.entity
+        # self.domain = self.manager.api.domains.get(id=self.entity.domain_id)
+        # if not self.domain:
+        #     raise exception.OperationBadRequest()
+
+        # return self.entity
 
     # def post(self):
         # send_reset_password_email(self.token.id, self.entity, _RESET_URL)
@@ -83,14 +90,35 @@ class Create(operation.Create):
 
 class Update(operation.Update):
 
+    def pre(self, session, **kwargs):
+        kwargs.pop('password', None)
+        return super().pre(session, **kwargs)
+
+
+class UpdatePassword(operation.Update):
+
+    def _check_password(self, password, password_db):
+        if not password:
+            return password_db is None
+        password_hash = self.manager.hash_password(password)
+        return password_hash == password_db
+
+    def pre(self, session, id, **kwargs):
+        old_password = kwargs.pop('old_password', None)
+        self.password = kwargs.pop('password', None)
+
+        if not id or not self.password:
+            raise exception.BadRequest()
+        super().pre(session=session, id=id)
+
+        if old_password:
+            if not self._check_password(old_password, self.entity.password):
+                raise exception.BadRequest()
+        return True
+
     def do(self, session, **kwargs):
-        password = kwargs.get('password', None)
-        if password:
-            kwargs['password'] = hashlib.sha256(
-                password.encode('utf-8')).hexdigest()
-
-        self.entity = super().do(session, **kwargs)
-
+        self.entity.password = self.manager.hash_password(self.password)
+        self.entity = super().do(session)
         return self.entity
 
 
@@ -122,8 +150,10 @@ class Restore(operation.Operation):
         return True
 
     def do(self, session, **kwargs):
-        token = self.manager.api.tokens.create(user=self.user)
-        send_email(token.id, self.user, self.domain)
+        self.manager.notify(
+            id=self.user.id, type_email=TypeEmail.RESTORE_PASSWORD)
+        # token = self.manager.api.tokens.create(user=self.user)
+        # send_email(token.id, self.user, self.domain)
 
 
 class Reset(operation.Operation):
@@ -138,7 +168,8 @@ class Reset(operation.Operation):
 
     def do(self, session, **kwargs):
         token = self.manager.api.tokens.get(id=self.token)
-        self.manager.update(id=token.user_id, password=self.password)
+        self.manager.update_password(id=token.user_id,
+                                     password=self.password)
 
     def post(self):
         self.manager.api.tokens.delete(id=self.token)
@@ -210,14 +241,40 @@ class DeletePhoto(operation.Update):
             self.manager.api.images.delete(id=self.photo_id)
 
 
+class Notify(operation.Operation):
+
+    def pre(self, session, id, type_email, **kwargs):
+        self.user = self.manager.get(id=id)
+        self.type_email = type_email
+        if not self.user or not self.type_email:
+            raise exception.BadRequest()
+        return True
+
+    def do(self, session, **kwargs):
+        self.token = self.manager.api.tokens.create(
+            session=session, user=self.user)
+
+        self.domain = self.manager.api.domains.get(id=self.user.domain_id)
+        if not self.domain:
+            raise exception.OperationBadRequest()
+
+    def post(self):
+        send_email(self.token.id, self.user, self.domain)
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
         super(Manager, self).__init__(driver)
         self.create = Create(self)
         self.update = Update(self)
+        self.update_password = UpdatePassword(self)
         self.restore = Restore(self)
         self.reset = Reset(self)
         self.routes = Routes(self)
         self.upload_photo = UploadPhoto(self)
         self.delete_photo = DeletePhoto(self)
+        self.notify = Notify(self)
+
+    def hash_password(self, password):
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()

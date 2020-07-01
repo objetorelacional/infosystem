@@ -4,6 +4,7 @@ import json
 from infosystem.common import utils
 from infosystem.common.subsystem import controller
 from infosystem.common import exception
+from infosystem.subsystem.user.resource import TypeEmail
 
 
 class Controller(controller.Controller):
@@ -120,6 +121,48 @@ class Controller(controller.Controller):
     def delete_photo(self, id):
         try:
             self.manager.delete_photo(id=id)
+        except exception.InfoSystemException as exc:
+            return flask.Response(response=exc.message,
+                                  status=exc.status)
+
+        return flask.Response(response=None,
+                              status=204,
+                              mimetype="application/json")
+
+    def update_password(self, id):
+        data = flask.request.get_json()
+        try:
+            # token = self.get_token(self.get_token_id())
+            password = data.get('password', None)
+            old_password = data.get('old_password', None)
+
+            # if token.user_id != id:
+            #     error = exception.InfoSystemException()
+            #     error.status = 401
+            #     error.message = "Not Authorized"
+            #     raise error
+            if not password:
+                raise exception.BadRequest()
+            self.manager.update_password(
+                id=id, password=password, old_password=old_password)
+        except exception.InfoSystemException as exc:
+            return flask.Response(response=exc.message,
+                                  status=exc.status)
+
+        return flask.Response(response=None,
+                              status=204,
+                              mimetype="application/json")
+
+    def notify(self, id):
+        data = flask.request.get_json()
+        try:
+            type_email = TypeEmail.value_of(data.get('type_email', None))
+            token = self.get_token(self.get_token_id())
+
+            if not type_email or not token:
+                raise exception.BadRequest()
+
+            self.manager.notify(id=id, type_email=type_email, token=token)
         except exception.InfoSystemException as exc:
             return flask.Response(response=exc.message,
                                   status=exc.status)

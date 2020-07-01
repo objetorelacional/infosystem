@@ -24,5 +24,11 @@ class Router(router.Router):
                 'callback': self.controller.upload_photo},
             {'action': 'routes', 'method': 'DELETE',
                 'url': self.resource_url + '/photo',
-                'callback': self.controller.delete_photo}
+                'callback': self.controller.delete_photo},
+            {'action': 'update_password', 'method': 'PUT',
+                'url': self.resource_url + '/password',
+                'callback': self.controller.update_password},
+            {'action': 'notify', 'method': 'POST',
+                'url': self.resource_url + '/notify',
+                'callback': self.controller.notify}
         ]
