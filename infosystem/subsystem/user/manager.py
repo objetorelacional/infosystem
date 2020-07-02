@@ -1,96 +1,35 @@
 import os
 import hashlib
-import flask
 
-from sparkpost import SparkPost
 from infosystem.common import exception
 from infosystem.common.subsystem import manager
 from infosystem.common.subsystem import operation
-
-_HTML_EMAIL_TEMPLATE = """
-    <div style="width: 100%; text-align: center">
-        <h1>{app_name}</h1>
-        <h2>CONFIRMAR E CRIAR SENHA</h2>
-    </div>
-
-    <p>Você acaba de ser cadastrado no portal da
-        {app_name}.</p>
-    <p>Para ter acesso ao sistema você deve clicar no link abaixo
-        para confirmar esse email e criar uma senha.</p>
-
-    <div style="width: 100%; text-align: center">
-        <a href="{reset_url}">Clique aqui para CONFIRMAR o
-            email e CRIAR uma senha.</a>
-    </div>
-"""
+from infosystem.subsystem.user.email import TypeEmail, send_email
 
 
-def send_email(token_id, user, domain):
-    try:
-        sparkpost = SparkPost()
+class UpdatePassword(operation.Update):
 
-        default_app_name = "INFOSYSTEM"
-        default_email_use_sandbox = False
-        default_reset_url = 'http://objetorelacional.com.br/#/reset'
-        default_noreply_email = 'noreply@objetorelacional.com.br'
-        default_email_subject = 'INFOSYSTEM - CONFIRMAR email e CRIAR senha'
+    def _check_password(self, password, password_db):
+        if not password:
+            return password_db is None
+        password_hash = self.manager.hash_password(password)
+        return password_hash == password_db
 
-        infosystem_app_name = os.environ.get(
-            'INFOSYSTEM_APP_NAME', default_app_name)
-        infosystem_reset_url = os.environ.get(
-            'INFOSYSTEM_RESET_URL', default_reset_url)
-        infosystem_noreply_email = os.environ.get(
-            'INFOSYSTEM_NOREPLY_EMAIL', default_noreply_email)
-        infosystem_email_subject = os.environ.get(
-            'INFOSYSTEM_EMAIL_SUBJECT', default_email_subject)
-        infosystem_email_use_sandbox = os.environ.get(
-            'INFOSYSTEM_EMAIL_USE_SANDBOX',
-            default_email_use_sandbox) == 'True'
+    def pre(self, session, id, **kwargs):
+        old_password = kwargs.pop('old_password', None)
+        self.password = kwargs.pop('password', None)
 
-        url = infosystem_reset_url + '/' + token_id + '/' + domain.name
+        if not (id and self.password and old_password):
+            raise exception.BadRequest()
+        super().pre(session=session, id=id)
 
-        sparkpost.transmissions.send(
-            use_sandbox=infosystem_email_use_sandbox,
-            recipients=[user.email],
-            html=_HTML_EMAIL_TEMPLATE.format(
-                app_name=infosystem_app_name, reset_url=url),
-            from_email=infosystem_noreply_email,
-            subject=infosystem_email_subject
-        )
-    except Exception:
-        # TODO(fdoliveira): do something here!
-        pass
-
-
-class Create(operation.Create):
+        if not self._check_password(old_password, self.entity.password):
+            raise exception.BadRequest()
+        return True
 
     def do(self, session, **kwargs):
-        self.entity = super().do(session, **kwargs)
-
-        self.token = self.manager.api.tokens.create(
-            session=session, user=self.entity)
-
-        self.domain = self.manager.api.domains.get(id=self.entity.domain_id)
-        if not self.domain:
-            raise exception.OperationBadRequest()
-
-        return self.entity
-
-    # def post(self):
-        # send_reset_password_email(self.token.id, self.entity, _RESET_URL)
-        # send_email(self.token.id, self.entity, self.domain)
-
-
-class Update(operation.Update):
-
-    def do(self, session, **kwargs):
-        password = kwargs.get('password', None)
-        if password:
-            kwargs['password'] = hashlib.sha256(
-                password.encode('utf-8')).hexdigest()
-
-        self.entity = super().do(session, **kwargs)
-
+        self.entity.password = self.manager.hash_password(self.password)
+        self.entity = super().do(session)
         return self.entity
 
 
@@ -122,26 +61,25 @@ class Restore(operation.Operation):
         return True
 
     def do(self, session, **kwargs):
-        token = self.manager.api.tokens.create(user=self.user)
-        send_email(token.id, self.user, self.domain)
+        self.manager.notify(
+            id=self.user.id, type_email=TypeEmail.FORGOT_PASSWORD)
+        # token = self.manager.api.tokens.create(user=self.user)
+        # send_email(token.id, self.user, self.domain)
 
 
-class Reset(operation.Operation):
+class Reset(operation.Update):
 
-    def pre(self, **kwargs):
-        self.token = flask.request.headers.get('token')
-        self.password = kwargs.get('password')
-
-        if not (self.token and self.password):
-            raise exception.OperationBadRequest()
+    def pre(self, session, id, **kwargs):
+        self.password = kwargs.get('password', None)
+        if not (id and self.password):
+            raise exception.BadRequest()
+        super().pre(session=session, id=id)
         return True
 
     def do(self, session, **kwargs):
-        token = self.manager.api.tokens.get(id=self.token)
-        self.manager.update(id=token.user_id, password=self.password)
-
-    def post(self):
-        self.manager.api.tokens.delete(id=self.token)
+        self.entity.password = self.manager.hash_password(self.password)
+        self.entity = super().do(session)
+        return self.entity
 
 
 class Routes(operation.Operation):
@@ -210,14 +148,47 @@ class DeletePhoto(operation.Update):
             self.manager.api.images.delete(id=self.photo_id)
 
 
+class Notify(operation.Operation):
+
+    def _get_sysadmin(self):
+        users = self.manager.list(name='sysadmin')
+        user = users[0] if users else None
+        return user
+
+    def pre(self, session, id, type_email, **kwargs):
+        self.user = self.manager.get(id=id)
+        self.type_email = type_email
+        if not self.user or not self.type_email:
+            raise exception.BadRequest()
+        return True
+
+    def do(self, session, **kwargs):
+        if self.type_email is TypeEmail.ACTIVATE_ACCOUNT:
+            user_token = self._get_sysadmin()
+        else:
+            user_token = self.user
+
+        self.token = self.manager.api.tokens.create(
+            session=session, user=user_token)
+
+        self.domain = self.manager.api.domains.get(id=self.user.domain_id)
+        if not self.domain:
+            raise exception.OperationBadRequest()
+
+        send_email(self.type_email, self.token.id, self.user, self.domain)
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
         super(Manager, self).__init__(driver)
-        self.create = Create(self)
-        self.update = Update(self)
+        self.update_password = UpdatePassword(self)
         self.restore = Restore(self)
         self.reset = Reset(self)
         self.routes = Routes(self)
         self.upload_photo = UploadPhoto(self)
         self.delete_photo = DeletePhoto(self)
+        self.notify = Notify(self)
+
+    def hash_password(self, password):
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()
