@@ -4,7 +4,7 @@ import json
 from infosystem.common import utils
 from infosystem.common.subsystem import controller
 from infosystem.common import exception
-from infosystem.subsystem.user.resource import TypeEmail
+from infosystem.subsystem.user.email import TypeEmail
 
 
 class Controller(controller.Controller):

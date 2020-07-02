@@ -1,65 +1,10 @@
 import os
 import hashlib
 
-from sparkpost import SparkPost
 from infosystem.common import exception
 from infosystem.common.subsystem import manager
 from infosystem.common.subsystem import operation
-from infosystem.subsystem.user.resource import TypeEmail
-
-_HTML_EMAIL_TEMPLATE = """
-    <div style="width: 100%; text-align: center">
-        <h1>{app_name}</h1>
-        <h2>CONFIRMAR E CRIAR SENHA</h2>
-    </div>
-
-    <p>Você acaba de ser cadastrado no portal da
-        {app_name}.</p>
-    <p>Para ter acesso ao sistema você deve clicar no link abaixo
-        para confirmar esse email e criar uma senha.</p>
-
-    <div style="width: 100%; text-align: center">
-        <a href="{reset_url}">Clique aqui para CONFIRMAR o
-            email e CRIAR uma senha.</a>
-    </div>
-"""
-
-
-def send_email(token_id, user, domain):
-    try:
-        sparkpost = SparkPost()
-
-        default_app_name = "INFOSYSTEM"
-        default_email_use_sandbox = False
-        default_reset_url = 'http://objetorelacional.com.br/#/reset'
-        default_noreply_email = 'noreply@objetorelacional.com.br'
-        default_email_subject = 'INFOSYSTEM - CONFIRMAR email e CRIAR senha'
-
-        infosystem_app_name = os.environ.get(
-            'INFOSYSTEM_APP_NAME', default_app_name)
-        infosystem_reset_url = os.environ.get(
-            'INFOSYSTEM_RESET_URL', default_reset_url)
-        infosystem_noreply_email = os.environ.get(
-            'INFOSYSTEM_NOREPLY_EMAIL', default_noreply_email)
-        infosystem_email_subject = os.environ.get(
-            'INFOSYSTEM_EMAIL_SUBJECT', default_email_subject)
-        infosystem_email_use_sandbox = os.environ.get(
-            'INFOSYSTEM_EMAIL_USE_SANDBOX',
-            default_email_use_sandbox) == 'True'
-
-        url = infosystem_reset_url + '/' + token_id + '/' + domain.name
-
-        sparkpost.transmissions.send(
-            use_sandbox=infosystem_email_use_sandbox,
-            recipients=[user.email],
-            html=_HTML_EMAIL_TEMPLATE.format(
-                app_name=infosystem_app_name, reset_url=url),
-            from_email=infosystem_noreply_email,
-            subject=infosystem_email_subject
-        )
-    except Exception:
-        # TODO(fdoliveira): do something here!
-        pass
+from infosystem.subsystem.user.email import TypeEmail, send_email
 
 
 class UpdatePassword(operation.Update):
@@ -117,7 +62,7 @@ class Restore(operation.Operation):
 
     def do(self, session, **kwargs):
         self.manager.notify(
-            id=self.user.id, type_email=TypeEmail.RESTORE_PASSWORD)
+            id=self.user.id, type_email=TypeEmail.FORGOT_PASSWORD)
         # token = self.manager.api.tokens.create(user=self.user)
         # send_email(token.id, self.user, self.domain)
 
@@ -205,6 +150,11 @@ class DeletePhoto(operation.Update):
 
 class Notify(operation.Operation):
 
+    def _get_sysadmin(self):
+        users = self.manager.list(name='sysadmin')
+        user = users[0] if users else None
+        return user
+
     def pre(self, session, id, type_email, **kwargs):
         self.user = self.manager.get(id=id)
         self.type_email = type_email
@@ -213,15 +163,19 @@ class Notify(operation.Operation):
         return True
 
     def do(self, session, **kwargs):
+        if self.type_email is TypeEmail.ACTIVATE_ACCOUNT:
+            user_token = self._get_sysadmin()
+        else:
+            user_token = self.user
+
         self.token = self.manager.api.tokens.create(
-            session=session, user=self.user)
+            session=session, user=user_token)
 
         self.domain = self.manager.api.domains.get(id=self.user.domain_id)
         if not self.domain:
             raise exception.OperationBadRequest()
 
-    def post(self):
-        send_email(self.token.id, self.user, self.domain)
+        send_email(self.type_email, self.token.id, self.user, self.domain)
 
 
 class Manager(manager.Manager):

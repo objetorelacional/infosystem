@@ -1,19 +1,8 @@
-import enum
 import uuid
 from sqlalchemy import orm
 from infosystem.database import db
 from sqlalchemy import UniqueConstraint
 from infosystem.common.subsystem import entity
-
-
-class TypeEmail(enum.Enum):
-    USER_CREATED = 1
-    FORGET_PASSWORD = 2
-    UPDATED_PASSWORD = 3
-
-    @staticmethod
-    def value_of(value):
-        return TypeEmail.__members__.get(value, None)
 
 
 class User(entity.Entity, db.Model):
