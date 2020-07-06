@@ -48,9 +48,6 @@ _HTML_EMAIL_ACTIVATE_ACCOUNT_TEMPLATE = """
     <div style="width: 100%; text-align: center">
         <a href="{activate_url}">Clique aqui para RECUPERAR a senha.</a>
     </div>
-
-    <p>username: {username}</p>
-    <p>dominio: {domain_name}</p>
 """
 
 
