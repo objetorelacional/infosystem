@@ -18,7 +18,7 @@ class Controller(controller.Controller):
     def _get_register_data(self):
         data = flask.request.get_json()
 
-        username = data.get('username', None)
+        username = data.get('username', 'admin')
         email = data.get('email', None)
         password = data.get('password', None)
         domain_name = data.get('domain', None)
