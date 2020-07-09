@@ -9,8 +9,8 @@ class Controller(controller.Controller):
     def _get_token_id(self):
         return flask.request.headers.get('token')
 
-    def _get_default_application(self):
-        applications = self.manager.api.applications.list(name='standard')
+    def _get_application_by_name(self, name):
+        applications = self.manager.api.applications.list(name=name)
         if not applications:
             raise exception.BadRequest()
         return applications[0]
@@ -22,19 +22,21 @@ class Controller(controller.Controller):
         email = data.get('email', None)
         password = data.get('password', None)
         domain_name = data.get('domain', None)
+        application_name = data.get('application', None)
 
-        if not (username and email and password and domain_name):
+        if not (username and email and password and domain_name and
+                application_name):
             raise exception.BadRequest()
 
-        return (username, email, password, domain_name)
+        return (username, email, password, domain_name, application_name)
 
     def register(self):
 
         try:
-            (username, email, password, domain_name) = \
+            (username, email, password, domain_name, application_name) = \
                 self._get_register_data()
 
-            application = self._get_default_application()
+            application = self._get_application_by_name(application_name)
 
             domain = self.manager.api.domains.create(
                 name=domain_name, application_id=application.id, active=False)
