@@ -10,9 +10,10 @@ class Controller(controller.Controller):
         super().__init__(manager, resource_wrap, collection_wrap)
 
     def create_capabilities(self, id: str):
+        data = flask.request.get_json()
         try:
 
-            self.manager.create_capabilities(id=id)
+            self.manager.create_capabilities(id=id, **data)
 
         except exception.InfoSystemException as exc:
             return flask.Response(response=exc.message,
