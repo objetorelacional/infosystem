@@ -1,6 +1,6 @@
 import flask
 
-from infosystem.common import exception
+from infosystem.common import exception, utils
 from infosystem.common.subsystem import controller
 
 
@@ -21,4 +21,17 @@ class Controller(controller.Controller):
 
         return flask.Response(response=None,
                               status=204,
+                              mimetype="application/json")
+
+    def get_roles(self, id: str):
+        try:
+            roles = self.manager.get_roles(id=id)
+            response = {"roles": [role.to_dict() for role in roles]}
+
+        except exception.InfoSystemException as exc:
+            return flask.Response(response=exc.message,
+                                  status=exc.status)
+
+        return flask.Response(response=utils.to_json(response),
+                              status=200,
                               mimetype="application/json")
