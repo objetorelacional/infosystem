@@ -1,5 +1,8 @@
 from infosystem.common import exception
 from infosystem.common.subsystem import operation, manager
+from infosystem.subsystem.capability.resource import Capability
+from infosystem.subsystem.policy.resource import Policy
+from infosystem.subsystem.role.resource import Role
 
 
 class CreateCapabilities(operation.Operation):
@@ -42,8 +45,24 @@ class CreateCapabilities(operation.Operation):
             self._create_capability(self.application_id, route_id)
 
 
+class GetRoles(operation.Operation):
+
+    def pre(self, session, id, **kwargs):
+        self.application_id = id
+        return self.driver.get(id, session=session) is not None
+
+    def do(self, session, **kwargs):
+        roles = session.query(Role). \
+            join(Policy). \
+            join(Capability). \
+            filter(Capability.application_id == self.application_id). \
+            distinct()
+        return roles
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
         super().__init__(driver)
         self.create_capabilities = CreateCapabilities(self)
+        self.get_roles = GetRoles(self)

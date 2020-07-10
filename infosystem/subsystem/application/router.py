@@ -14,5 +14,11 @@ class Router(router.Router):
                 'method': 'POST',
                 'url': self.resource_url + '/capabilities',
                 'callback': self.controller.create_capabilities
+            },
+            {
+                'action': 'getApplicationRoles',
+                'method': 'GET',
+                'url': self.resource_url + '/roles',
+                'callback': self.controller.get_roles
             }
         ]
