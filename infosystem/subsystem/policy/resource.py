@@ -1,3 +1,5 @@
+from sqlalchemy import UniqueConstraint, orm
+
 from infosystem.database import db
 from infosystem.common.subsystem import entity
 
@@ -9,7 +11,13 @@ class Policy(entity.Entity, db.Model):
 
     capability_id = db.Column(
         db.CHAR(32), db.ForeignKey("capability.id"), nullable=False)
+    capability = orm.relationship(
+        'Capability', backref=orm.backref('policy_capability'))
     role_id = db.Column(db.CHAR(32), db.ForeignKey("role.id"), nullable=False)
+    role = orm.relationship('Role', backref=orm.backref('policy_role'))
+
+    __table_args__ = (
+        UniqueConstraint('capability_id', 'role_id', name='policy_uk'),)
 
     def __init__(self, id, capability_id, role_id,
                  active=True, created_at=None, created_by=None,
