@@ -60,7 +60,10 @@ class RequestManager(object):
 
         if route.bypass:
             # lookup the domain specified as domain_name in the request body
-            data = flask.request.get_json()
+            if flask.request.is_json:
+                data = flask.request.get_json(silent=True)
+            else:
+                data = None
             if data and data.get('domain_name'):
                 domains = self.subsystems['domains'].manager.list(
                     name=data['domain_name'])
