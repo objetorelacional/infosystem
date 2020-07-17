@@ -1,4 +1,5 @@
 from infosystem.database import db
+from sqlalchemy import orm
 from infosystem.common.subsystem import entity
 
 
@@ -9,6 +10,8 @@ class Domain(entity.Entity, db.Model):
 
     application_id = db.Column(
         db.CHAR(32), db.ForeignKey("application.id"), nullable=False)
+    application = orm.relationship('Application', backref=orm.backref(
+        'domains'))
     name = db.Column(db.String(60), nullable=False, unique=True)
     parent_id = db.Column(
         db.CHAR(32), db.ForeignKey("domain.id"), nullable=True)
