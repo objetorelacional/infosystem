@@ -12,9 +12,9 @@ class Policy(entity.Entity, db.Model):
     capability_id = db.Column(
         db.CHAR(32), db.ForeignKey("capability.id"), nullable=False)
     capability = orm.relationship(
-        'Capability', backref=orm.backref('policy_capability'))
+        'Capability', backref=orm.backref('policies'))
     role_id = db.Column(db.CHAR(32), db.ForeignKey("role.id"), nullable=False)
-    role = orm.relationship('Role', backref=orm.backref('policy_role'))
+    role = orm.relationship('Role', backref=orm.backref('policies'))
 
     __table_args__ = (
         UniqueConstraint('capability_id', 'role_id', name='policy_uk'),)
