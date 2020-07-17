@@ -1,5 +1,5 @@
 from infosystem.database import db
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, orm
 from infosystem.common.subsystem import entity
 
 
@@ -9,6 +9,7 @@ class Role(entity.Entity, db.Model):
     attributes += entity.Entity.attributes
 
     name = db.Column(db.String(80), nullable=False)
+    policies = orm.relationship('Policy', backref=orm.backref('role_policies'))
 
     __table_args__ = (
         UniqueConstraint('name', name='role_name_uk'),)
