@@ -16,9 +16,9 @@ POLICYLESS_ROUTES = [
 
 SYSADMIN_RESOURCES = [
     ('POST', '/domains'),
-    ('PUT', '/domains/<id>'),
+    # ('PUT', '/domains/<id>'),
     ('DELETE', '/domains/<id>'),
-    ('LIST', '/domains'),
+    ('GET', '/domains'),
 
     ('POST', '/roles'),
     ('PUT', '/roles/<id>'),
@@ -26,7 +26,16 @@ SYSADMIN_RESOURCES = [
 
     ('POST', '/capabilities'),
     ('PUT', '/capabilities/<id>'),
-    ('DELETE', '/capabilities/<id>')
+    ('DELETE', '/capabilities/<id>'),
+
+    ('POST', '/applications'),
+    ('PUT', '/applications/<id>'),
+    ('DELETE', '/applications/<id>'),
+    ('GET', '/applications'),
+
+    ('POST', '/policies'),
+    ('PUT', '/policies/<id>'),
+    ('DELETE', '/policies/<id>')
 ]
 
 
@@ -110,7 +119,7 @@ class System(flask.Flask):
                 # TODO(samueldmq): duplicate the line above here and
                 # see what breaks, it's probably the SQL
                 # session management!
-                if not route_ref.sysadmin:
+                if not (route_ref.sysadmin or route_ref.bypass):
                     cap_mng = self.subsystems['capabilities'].manager
                     capability = cap_mng.create(
                         application_id=default_application_id,
