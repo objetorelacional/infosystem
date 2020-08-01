@@ -20,20 +20,20 @@ class CreateCapabilities(operation.Operation):
                                              route_id=route_id)
 
     def _filter_route(self, route, endpoint, exceptions):
-        is_sysadmin = route.sysadmin
         is_in_exceptions = route.method in exceptions
 
         start_with = route.url.startswith("{}/".format(endpoint))
         match_endpoint = route.url == endpoint or start_with
 
-        return not is_sysadmin and not is_in_exceptions and match_endpoint
+        return not is_in_exceptions and match_endpoint
 
     def _filter_routes(self, routes, endpoint, exceptions):
         return [route.id for route in routes
                 if self._filter_route(route, endpoint, exceptions)]
 
     def do(self, session, **kwargs):
-        routes = self.manager.api.routes.list(sysadmin=False)
+        routes = self.manager.api.routes.list(
+            sysadmin=False, bypass=False, active=True)
         routes_ids = []
 
         for resource in self.resources:

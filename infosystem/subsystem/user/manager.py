@@ -1,10 +1,19 @@
 import os
 import hashlib
 
+from sqlalchemy import or_, and_
+
 from infosystem.common import exception
 from infosystem.common.subsystem import manager
 from infosystem.common.subsystem import operation
 from infosystem.subsystem.user.email import TypeEmail, send_email
+from infosystem.subsystem.user.resource import User
+from infosystem.subsystem.capability.resource import Capability
+from infosystem.subsystem.domain.resource import Domain
+from infosystem.subsystem.route.resource import Route
+from infosystem.subsystem.grant.resource import Grant
+from infosystem.subsystem.policy.resource import Policy
+from infosystem.subsystem.role.resource import Role
 
 
 class UpdatePassword(operation.Update):
@@ -85,37 +94,41 @@ class Reset(operation.Update):
 class Routes(operation.Operation):
 
     def do(self, session, user_id, **kwargs):
-        grants = self.manager.api.grants.list(user_id=user_id)
-        grants_ids = [g.role_id for g in grants]
-        roles = self.manager.api.roles.list()
+        routes = session.query(Route). \
+            join(Capability). \
+            join(Policy). \
+            join(Grant, Policy.role_id == Grant.role_id). \
+            join(User). \
+            join(Domain,
+                 and_(Domain.application_id == Capability.application_id,
+                      Domain.id == User.domain_id)). \
+            filter(or_(User.id == user_id, Route.bypass),
+                   User.active, Domain.active, Grant.active,
+                   Policy.active, Capability.active, Route.active). \
+            distinct(). \
+            all()
 
-        user_roles_id = [r.id for r in roles if r.id in grants_ids]
+        return routes
 
-        # FIXME(fdoliveira) Try to send user_roles_id as paramater on query
-        policies = self.manager.api.policies.list()
-        policies_capabilitys_id = [
-            p.capability_id for p in policies if p.role_id in user_roles_id]
 
-        user = self.manager.api.users.list(id=user_id)[0]
-        domain = self.manager.api.domains.get(id=user.domain_id)
-        capabilities = self.manager.api.capabilities.list(
-            application_id=domain.application_id)
+class Authorization(operation.Operation):
 
-        policy_capabilities = [
-            c for c in capabilities if c.id in policies_capabilitys_id]
+    def do(self, session, user_id, route, **kwargs):
+        has_capabilities = session.query(User). \
+            join(Domain). \
+            join(Grant). \
+            join(Role). \
+            join(Policy). \
+            join(Capability,
+                 and_(Capability.id == Policy.capability_id,
+                      Capability.application_id == Domain.application_id)). \
+            filter(and_(User.id == user_id,
+                        or_(not route.sysadmin, Role.name == 'sysadmin'),
+                        User.active, Domain.active, Grant.active,
+                        Policy.active, Capability.active)). \
+            count()
 
-        # NOTE(samueldmq): if there is no policy for a capabiltiy,
-        # then it's open! add it too!
-        restricted_capabilities = [p.capability_id for p in policies]
-        open_capabilities = [
-            c for c in capabilities if c.id not in restricted_capabilities]
-
-        user_routes = [self.manager.api.routes.get(id=c.route_id) for c in (
-            policy_capabilities + open_capabilities)]
-
-        bypass_routes = self.manager.api.routes.list(bypass=True)
-
-        return list(set(user_routes).union(set(bypass_routes)))
+        return has_capabilities > 0
 
 
 class UploadPhoto(operation.Update):
@@ -189,6 +202,7 @@ class Manager(manager.Manager):
         self.upload_photo = UploadPhoto(self)
         self.delete_photo = DeletePhoto(self)
         self.notify = Notify(self)
+        self.authorize = Authorization(self)
 
     def hash_password(self, password):
         return hashlib.sha256(password.encode('utf-8')).hexdigest()

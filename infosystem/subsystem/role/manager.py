@@ -26,13 +26,12 @@ class CreatePolicies(operation.Operation):
                                          capability_id=capability_id)
 
     def _filter_route(self, route, endpoint, exceptions) -> bool:
-        is_sysadmin = route.sysadmin
         is_in_exceptions = route.method in exceptions
 
         start_with = route.url.startswith("{}/".format(endpoint))
         match_endpoint = route.url == endpoint or start_with
 
-        return not is_sysadmin and not is_in_exceptions and match_endpoint
+        return not is_in_exceptions and match_endpoint
 
     def _filter_routes(self, resources: List[Dict[str, Any]],
                        routes: List[Route]) -> List[str]:
@@ -48,14 +47,16 @@ class CreatePolicies(operation.Operation):
     def do(self, session, **kwargs):
         routes = session.query(Route). \
             join(Capability). \
-            filter(Capability.application_id == self.application_id). \
+            filter(Capability.application_id == self.application_id,
+                   ~Route.sysadmin, ~Route.bypass, Route.active). \
             all()
 
         routes_ids = self._filter_routes(self.resources, routes)
 
         capabilities = session.query(Capability.id). \
             filter(and_(Capability.application_id == self.application_id,
-                        Capability.route_id.in_(routes_ids))). \
+                        Capability.route_id.in_(routes_ids),
+                        Capability.active)). \
             all()
 
         for capability in capabilities:
