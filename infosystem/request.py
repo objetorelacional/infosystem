@@ -54,79 +54,25 @@ class RequestManager(object):
             return flask.Response(response=None, status=404)
         route = routes[0]
 
-        if route.sysadmin:
-            # TODO(samueldmq): implement sysadmin logic
-            return
+        if not route.active:
+            return flask.Response(response=None, status=410)
 
         if route.bypass:
-            # lookup the domain specified as domain_name in the request body
-            if flask.request.is_json:
-                data = flask.request.get_json(silent=True)
-            else:
-                data = None
-            if data and data.get('domain_name'):
-                domains = self.subsystems['domains'].manager.list(
-                    name=data['domain_name'])
-                if domains:
-                    application_id = domains[0].application_id
+            return
 
-                    if not self.check_capability(route.id, application_id):
-                        return flask.Response(response=None, status=404)
-                else:
-                    return flask.Response(response=None, status=400)
-            # TODO(samueldmq): THIS SHOULD BE RE-ENABLED,
-            # DISABLED FOR NOW FOR /FOTOS
-            # else:
-            #     return flask.Response(response=None, status=400)
-        else:
-            token_id = flask.request.token
+        token_id = flask.request.token
 
-            if token_id:
-                try:
-                    token = self.subsystems['tokens'].manager.get(id=token_id)
-                except exception.NotFound:
-                    return flask.Response(response=None, status=401)
+        if not token_id:
+            return flask.Response(response=None, status=401)
 
-                user = self.subsystems['users'].manager.list(
-                    id=token.user_id)[0]
-                domain = self.subsystems['domains'].manager.get(
-                    id=user.domain_id)
+        try:
+            token = self.subsystems['tokens'].manager.get(id=token_id)
+        except exception.NotFound:
+            return flask.Response(response=None, status=401)
 
-                # TODO Checar domain
-                # 1 - sem domain seta o default obs: apenas o sysadmin pode
-                #       gravar no default
-                # 2 checar se o domain enviado corresponde ao do token
+        can_access = self.subsystems['users'].manager.authorize(
+            user_id=token.user_id, route=route)
 
-                if not self.check_capability(route.id, domain.application_id):
-                    return flask.Response(response=None, status=404)
-
-                # Now check the user grants
-                grants = self.subsystems['grants'].manager.list(
-                    user_id=user.id)
-                user_role_ids = [g.role_id for g in grants]
-
-                # TODO(samueldmq): sysadmin won't provide a domain,
-                # so capabilities will be empty
-                # treat this case here once we support sysadmin
-                capability = self.subsystems['capabilities'].manager.list(
-                    route_id=route.id, application_id=domain.application_id)[0]
-
-                policies = self.subsystems['policies'].manager.list(
-                    capability_id=capability.id)
-
-                # open capability
-                if not policies:
-                    return
-
-                policy_role_ids = [p.role_id for p in policies]
-
-                intersection = set(user_role_ids).intersection(policy_role_ids)
-                if not intersection:
-                    return flask.Response(response=None, status=401)
-            else:
-                return flask.Response(response=None, status=401)
-
-    def check_capability(self, route_id, application_id):
-        capabilities = self.subsystems['capabilities'].manager.list(
-            route_id=route_id, application_id=application_id)
-        return capabilities
+        if not can_access:
+            return flask.Response(response=None, status=403)
+        return
