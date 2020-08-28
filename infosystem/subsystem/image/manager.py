@@ -35,6 +35,7 @@ class Get(operation.Get):
 class Delete(operation.Delete):
 
     def post(self):
+        # TODO(fdoliveira) Put this in worker
         folder = self.manager.get_upload_folder(self.entity,
                                                 self.entity.domain_id)
         shutil.rmtree(folder)

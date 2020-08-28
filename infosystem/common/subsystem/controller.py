@@ -44,7 +44,7 @@ class Controller(object):
         return _filters_cleanup
 
     def _get_include_dict(self, query_arg, filter_args):
-        lists = [l.split('.') for l in query_arg.split(',')]
+        lists = [li.split('.') for li in query_arg.split(',')]
         include_dict = {}
         for list in lists:
             current = include_dict
