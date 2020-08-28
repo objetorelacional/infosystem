@@ -10,7 +10,6 @@ class Request(flask.Request):
     def _check_uuid4(self, uuid_str):
         if len(uuid_str) != 32:
             return False
-
         try:
             return uuid.UUID(uuid_str, version=4)
         except ValueError:
@@ -26,6 +25,15 @@ class Request(flask.Request):
         path_bits = [
             '<id>' if self._check_uuid4(i) else i for i in path_info.split('/')
         ]
+
+        if path_bits.count('<id>') > 1:
+            pos = 0
+            qty_id = 1
+            for bit in path_bits:
+                if bit == '<id>':
+                    path_bits[pos] = '<id' + str(qty_id) + '>'
+                    qty_id += 1
+                pos += 1
         return '/'.join(path_bits)
 
     @property
