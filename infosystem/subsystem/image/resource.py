@@ -15,7 +15,7 @@ class Image(File, db.Model):
     attributes += File.attributes
 
     id = db.Column(db.ForeignKey('file_infosys.id'), primary_key=True)
-    type_image = db.Column(db.String(20), nullable=False)
+    type_image = db.Column(db.String(100), nullable=False)
 
     __mapper_args__ = {'polymorphic_identity': 'image'}
 

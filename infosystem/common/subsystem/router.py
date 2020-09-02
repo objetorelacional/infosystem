@@ -6,6 +6,7 @@ class Router(object):
 
         self.collection_url = '/' + collection
         self.resource_url = self.collection_url + '/<id>'
+        self.resource_enum_url = self.resource_url.replace('<id>', '<id1>')
 
         if routes:
             self._routes = [

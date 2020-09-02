@@ -52,6 +52,7 @@ class Create(operation.Operation):
             user_id=self.user.id)
 
         self.driver.create(token, session=session)
+
         return token
 
 

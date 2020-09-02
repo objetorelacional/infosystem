@@ -139,7 +139,8 @@ class System(flask.Flask):
     def create_default_domain(self, default_application_id):
         # Create DEFAULT domain
         default_domain = self.subsystems['domains'].manager.create(
-            name='default', application_id=default_application_id)
+            name='default', application_id=default_application_id,
+            addresses=[], contacts=[])
 
         # Create SYSDAMIN role
         sysadmin_role = self.subsystems['roles'].manager.create(

@@ -41,9 +41,10 @@ class Driver(object):
                     # contructor
                     setattr(instance, attr, var.property.mapper.class_(
                         id=uuid.uuid4().hex, **dict(value, **mapped_attr)))
-        except Exception:
+        except Exception as exec:
             # TODO(samueldmq): replace with specific exception
-            raise exception.BadRequest()
+            message = ''.join(exec.args)
+            raise exception.BadRequest(message)
 
         return instance
 
