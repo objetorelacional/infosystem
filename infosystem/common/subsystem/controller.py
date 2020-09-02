@@ -83,11 +83,6 @@ class Controller(object):
         return include_dict
 
     def create(self):
-        # if not flask.request.is_json:
-        #     return flask.Response(
-        #         response=exception.BadRequestContentType.message,
-        #         status=exception.BadRequestContentType.status)
-
         data = flask.request.get_json()
 
         try:
