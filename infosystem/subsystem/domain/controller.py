@@ -24,20 +24,11 @@ class Controller(controller.Controller):
             raise e
         return name
 
-    def _get_response_domain_name(self, entity):
-        response = {
-            "domain": {
-                "id": entity.id,
-                "name": entity.name
-            }
-        }
-        return response
-
     def domain_by_name(self):
         try:
             name = self._get_name_in_args()
-            entity = self.manager.domain_by_name(name=name)
-            response = self._get_response_domain_name(entity)
+            domain = self.manager.domain_by_name(domain_name=name)
+            response = {self.resource_wrap: domain.to_dict()}
             return flask.Response(response=json.dumps(response, default=str),
                                   status=200,
                                   mimetype="application/json")
