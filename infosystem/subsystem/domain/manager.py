@@ -5,16 +5,21 @@ from infosystem.common.subsystem import operation, manager
 
 class DomainByName(operation.Operation):
 
-    def pre(self, session, name, **kwargs):
-        self.name = name
+    def pre(self, session, domain_name, **kwargs):
+        self.domain_name = domain_name
         return True
 
     def do(self, session, **kwargs):
-        entities = self.manager.list(name=self.name)
-        if not entities:
-            raise exception.NotFound()
-        entity = entities[0]
-        return entity
+        domains = self.manager.list(name=self.domain_name)
+        if not domains:
+            raise exception.NotFound('ERROR! Domain name not found')
+        domain = domains[0]
+
+        # Hide user ID from public resources
+        domain.created_by = None
+        domain.updated_by = None
+
+        return domain
 
 
 class UploadLogo(operation.Update):
@@ -61,9 +66,11 @@ class Register(operation.Create):
         self.domain_display_name = domain_display_name
         self.application_name = application_name
 
-        if not (username and email and password and
-                domain_name and application_name):
-            raise exception.BadRequest('ERROR! Not enogth data')
+        user_params_ok = username and email and password
+        app_params_ok = domain_name and application_name
+        if not user_params_ok and app_params_ok:
+            raise exception.BadRequest(
+                'ERROR! Not enough data to register domain')
 
         applications = \
             self.manager.api.applications.list(name=application_name)
