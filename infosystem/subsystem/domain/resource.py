@@ -7,7 +7,7 @@ from infosystem.common.subsystem import entity
 class Domain(entity.Entity, db.Model):
 
     attributes = ['name', 'display_name', 'parent_id',
-                  'application_id', 'logo_id']
+                  'application_id', 'logo_id', 'doc', 'description']
     attributes += entity.Entity.attributes
 
     application_id = db.Column(
