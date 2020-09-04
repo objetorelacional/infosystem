@@ -16,10 +16,11 @@ class Domain(entity.Entity, db.Model):
         'domains'))
     name = db.Column(db.String(60), nullable=False, unique=True)
     display_name = db.Column(db.String(100), nullable=False)
+    doc = db.Column(db.String(60), nullable=True)
+    description = db.Column(db.String(1000), nullable=True)
     logo_id = db.Column(db.CHAR(32), db.ForeignKey('image.id'), nullable=True)
     parent_id = db.Column(
         db.CHAR(32), db.ForeignKey("domain.id"), nullable=True)
-    type = db.Column(db.String(30), nullable=False)
     addresses = orm.relationship(
         'DomainAddress', backref=orm.backref('domain_addresses'),
         cascade='delete,delete-orphan,save-update')
@@ -29,13 +30,8 @@ class Domain(entity.Entity, db.Model):
 
     __tablename__ = 'domain'
 
-    __mapper_args__ = {
-        'polymorphic_on': type,
-        'polymorphic_identity': 'domain'
-    }
-
-    def __init__(self, id, application_id, name,
-                 display_name=None, logo_id=None, parent_id=None,
+    def __init__(self, id, application_id, name, display_name=None,
+                 doc=None, description=None, logo_id=None, parent_id=None,
                  active=True, created_at=None, created_by=None,
                  updated_at=None, updated_by=None, tag=None):
         super().__init__(id, active, created_at, created_by,
@@ -46,8 +42,10 @@ class Domain(entity.Entity, db.Model):
             self.display_name = name
         else:
             self.display_name = display_name
-        self.parent_id = parent_id
+        self.doc = doc
+        self.description = description
         self.logo_id = logo_id
+        self.parent_id = parent_id
 
     @classmethod
     def embedded(cls):
@@ -61,7 +59,7 @@ class DomainAddress(entity.Entity, db.Model):
 
     domain_id = db.Column(
         db.CHAR(32), db.ForeignKey('domain.id'), nullable=False)
-    postal_code = db.Column(db.String(20), nullable=False)
+    postal_code = db.Column(db.String(30), nullable=False)
     address_line_1 = db.Column(db.String(255), nullable=False)
     address_line_2 = db.Column(db.String(255), nullable=True)
     city = db.Column(db.String(100), nullable=False)
