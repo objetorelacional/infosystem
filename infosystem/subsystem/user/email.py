@@ -74,10 +74,10 @@ class TypeEmail(enum.Enum):
 def get_html_reset_password(app_name, base_url, type_email, token_id, domain):
     action = type_email.value.get('action')
 
-    url = '{}/reset/{}/{}?action={}'.format(base_url,
-                                            token_id,
-                                            domain.name,
-                                            action)
+    url = '{}/auth/reset/{}/{}?action={}'.format(base_url,
+                                                 token_id,
+                                                 domain.name,
+                                                 action)
 
     return type_email.template.format(app_name=app_name, reset_url=url)
 
@@ -85,7 +85,10 @@ def get_html_reset_password(app_name, base_url, type_email, token_id, domain):
 def get_html_activate_account(app_name, base_url, template,
                               token_id, user, domain):
 
-    url = '{}/activate/{}/{}/{}'.format(base_url, token_id, domain.id, user.id)
+    url = '{}/landing/activate/{}/{}/{}'.format(base_url,
+                                                token_id,
+                                                domain.id,
+                                                user.id)
 
     return template.format(app_name=app_name, activate_url=url,
                            username=user.name, domain_name=domain.name)
