@@ -4,6 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Optional, Union, Any
+import uuid
 
 DATE_FMT = '%Y-%m-%d'
 DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%fZ'
@@ -62,3 +63,7 @@ class InfosystemEncoder(json.JSONEncoder):
 
 def to_json(value: Any) -> str:
     return json.dumps(value, cls=InfosystemEncoder)
+
+
+def random_uuid() -> str:
+    return uuid.uuid4().hex
