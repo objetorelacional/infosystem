@@ -5,6 +5,10 @@ from infosystem.common.subsystem import entity
 
 class Role(entity.Entity, db.Model):
 
+    USER = 'User'
+    SYSADMIN = 'Sysadmin'
+    ADMIN = 'Admin'
+
     attributes = ['name']
     attributes += entity.Entity.attributes
 
