@@ -125,6 +125,57 @@ class Activate(operation.Create):
         return True
 
 
+class CreateSetting(operation.Update):
+
+    def pre(self, session, id: str, **kwargs) -> bool:
+        self.key = kwargs.get('key', None)
+        self.value = kwargs.get('value', None)
+
+        if not self.key or not self.value:
+            raise exception.BadRequest()
+        return super().pre(session=session, id=id)
+
+    def do(self, session, **kwargs):
+        setting = self.entity.create_setting(self.key, self.value)
+        super().do(session)
+
+        return setting
+
+
+class UpdateSetting(operation.Update):
+
+    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
+        self.setting_id = setting_id
+        self.key = kwargs.get('key', None)
+        self.value = kwargs.get('value', None)
+        if not self.value or not self.setting_id:
+            raise exception.BadRequest()
+        return super().pre(session=session, id=id)
+
+    def do(self, session, **kwargs):
+        setting = self.entity.update_setting(self.setting_id,
+                                             self.key,
+                                             self.value)
+        super().do(session)
+
+        return setting
+
+
+class RemoveSetting(operation.Update):
+
+    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
+        self.setting_id = setting_id
+        super().pre(session, id=id)
+
+        return self.entity.is_stable()
+
+    def do(self, session, **kwargs):
+        setting = self.entity.remove_setting(self.setting_id)
+        super().do(session=session)
+
+        return setting
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
@@ -134,3 +185,6 @@ class Manager(manager.Manager):
         self.remove_logo = RemoveLogo(self)
         self.register = Register(self)
         self.activate = Activate(self)
+        self.create_setting = CreateSetting(self)
+        self.update_setting = UpdateSetting(self)
+        self.remove_setting = RemoveSetting(self)
