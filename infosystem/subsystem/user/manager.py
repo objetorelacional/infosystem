@@ -16,6 +16,20 @@ from infosystem.subsystem.policy.resource import Policy
 from infosystem.subsystem.role.resource import Role
 
 
+class Create(operation.Create):
+
+    def pre(self, session, **kwargs):
+        self.role = self.manager.api.roles.get_role_by_name(
+            role_name=Role.USER)
+        return super().pre(session, **kwargs)
+
+    def do(self, session, **kwargs):
+        super().do(session)
+        self.manager.api.grants.create(role_id=self.role.id,
+                                       user_id=self.entity.id)
+        return self.entity
+
+
 class UpdatePassword(operation.Update):
 
     def _check_password(self, password, password_db):
@@ -195,6 +209,7 @@ class Manager(manager.Manager):
 
     def __init__(self, driver):
         super(Manager, self).__init__(driver)
+        self.create = Create(self)
         self.update_password = UpdatePassword(self)
         self.restore = Restore(self)
         self.reset = Reset(self)
