@@ -148,7 +148,7 @@ class UpdateSetting(operation.Update):
         self.setting_id = setting_id
         self.key = kwargs.get('key', None)
         self.value = kwargs.get('value', None)
-        if not self.value or not self.setting_id:
+        if not (self.key and self.value and self.setting_id):
             raise exception.BadRequest()
         return super().pre(session=session, id=id)
 

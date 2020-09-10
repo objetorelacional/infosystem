@@ -76,6 +76,10 @@ class Domain(entity.Entity, db.Model):
 
     def update_setting(self, setting_id: str, key: str, value: str):
         setting = self._get_setting(setting_id)
+        if setting.key != key:
+            raise exception.BadRequest(
+                "Erro! You can't update the key. Remove and Create another")
+
         setting.value = value
         return setting
 
