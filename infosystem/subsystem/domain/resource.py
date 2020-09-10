@@ -136,8 +136,8 @@ class DomainSetting(entity.Entity, db.Model):
 
     domain_id = db.Column(
         db.CHAR(32), db.ForeignKey("domain.id"), nullable=False)
-    key = db.Column(db.String(60), nullable=False)
-    value = db.Column(db.String(100), nullable=False)
+    key = db.Column(db.String(100), nullable=False)
+    value = db.Column(db.String(1000), nullable=False)
 
     def __init__(self, id, domain_id, key, value,
                  active=True, created_at=None, created_by=None,
