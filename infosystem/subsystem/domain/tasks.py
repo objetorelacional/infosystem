@@ -1,9 +1,13 @@
-from infosystem.celery import celery
 from flask.globals import current_app
+
+from infosystem.celery import celery
+from infosystem.common import exception
 from infosystem.subsystem.user.email import TypeEmail
 
 
-@celery.task
+@celery.task(autoretry_for=(exception.NotFound,),
+             default_retry_delay=5,
+             retry_kwargs={'max_retries': 3})
 def send_email(user_id: str) -> None:
-    current_app.subsystems['users'].manager.notify(
+    return current_app.subsystems['users'].manager.notify(
         id=user_id, type_email=TypeEmail.ACTIVATE_ACCOUNT)
