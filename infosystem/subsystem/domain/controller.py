@@ -36,6 +36,18 @@ class Controller(controller.Controller):
             return flask.Response(response=exc.message,
                                   status=exc.status)
 
+    def domain_logo_by_name(self):
+        try:
+            name = self._get_name_in_args()
+            folder, filename = self.manager.domain_logo_by_name(
+                domain_name=name)
+            return flask.send_from_directory(folder, filename)
+        except KeyError:
+            return self.get_bad_request('Unknown Quality')
+        except exception.InfoSystemException as exc:
+            return flask.Response(response=exc.message,
+                                  status=exc.status)
+
     def get_token_id(self):
         return flask.request.headers.get('token')
 
