@@ -17,6 +17,13 @@ class Router(router.Router):
                 'bypass': True
             },
             {
+                'action': 'Get Domain Logo By Name',
+                'method': 'GET',
+                'url': '/domainlogobyname',
+                'callback': self.controller.domain_logo_by_name,
+                'bypass': True
+            },
+            {
                 'action': 'Upload logo to Domain',
                 'method': 'PUT',
                 'url': self.resource_url + '/logo',

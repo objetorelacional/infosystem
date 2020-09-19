@@ -31,4 +31,7 @@ class Image(File, db.Model):
         return 'images'
 
     def filename_with_quality(self, quality: QualityImage):
-        return '{}.{}.{}'.format(self.id, quality.value, 'jpg')
+        if quality is None:
+            return '{}.{}'.format(self.id, 'jpg')
+        else:
+            return '{}.{}.{}'.format(self.id, quality.value, 'jpg')

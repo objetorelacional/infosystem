@@ -22,6 +22,25 @@ class DomainByName(operation.Operation):
         return domain
 
 
+class DomainLogoByName(operation.Operation):
+
+    def pre(self, session, domain_name, **kwargs):
+        self.domain_name = domain_name
+        return True
+
+    def do(self, session, **kwargs):
+        domains = self.manager.list(name=self.domain_name)
+        if not domains:
+            raise exception.NotFound('ERROR! Domain name not found')
+        domain = domains[0]
+
+        if domain.logo_id is None:
+            raise exception.NotFound('ERROR! Domain logo not found')
+
+        kwargs['quality'] = None
+        return self.manager.api.images.get(id=domain.logo_id, **kwargs)
+
+
 class UploadLogo(operation.Update):
 
     def pre(self, session, id, token, file, **kwargs):
@@ -181,6 +200,7 @@ class Manager(manager.Manager):
     def __init__(self, driver):
         super(Manager, self).__init__(driver)
         self.domain_by_name = DomainByName(self)
+        self.domain_logo_by_name = DomainLogoByName(self)
         self.upload_logo = UploadLogo(self)
         self.remove_logo = RemoveLogo(self)
         self.register = Register(self)
