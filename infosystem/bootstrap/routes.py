@@ -20,6 +20,7 @@ class BootstrapRoutes(object):
 
     def execute(self) -> List[Route]:
         routes_db = self._get_routes_db()
+        # TODO inactivate old_routes
         (new_routes, old_routes) = self._get_diff_routes(
             self.subsystems_routes, routes_db)
 
