@@ -8,20 +8,20 @@ from infosystem import scheduler
 from infosystem import celery
 from infosystem.bootstrap import Bootstrap
 from infosystem.common.input import InputResourceUtils
-from infosystem.system import System as SystemApp
+from infosystem.system import System
 
 from infosystem.resources import SYSADMIN_EXCLUSIVE_POLICIES, \
     SYSADMIN_RESOURCES, USER_RESOURCES
 
 
-system = SystemApp('infosystem',
-                   subsystem_module.all,
-                   USER_RESOURCES,
-                   SYSADMIN_RESOURCES,
-                   SYSADMIN_EXCLUSIVE_POLICIES)
+system = System('infosystem',
+                subsystem_module.all,
+                USER_RESOURCES,
+                SYSADMIN_RESOURCES,
+                SYSADMIN_EXCLUSIVE_POLICIES)
 
 
-class System(flask.Flask):
+class SystemFlask(flask.Flask):
 
     request_class = request.Request
 
