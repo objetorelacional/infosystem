@@ -22,6 +22,25 @@ class DomainByName(operation.Operation):
         return domain
 
 
+class DomainLogoByName(operation.Operation):
+
+    def pre(self, session, domain_name, **kwargs):
+        self.domain_name = domain_name
+        return True
+
+    def do(self, session, **kwargs):
+        domains = self.manager.list(name=self.domain_name)
+        if not domains:
+            raise exception.NotFound('ERROR! Domain name not found')
+        domain = domains[0]
+
+        if domain.logo_id is None:
+            raise exception.NotFound('ERROR! Domain logo not found')
+
+        kwargs['quality'] = None
+        return self.manager.api.images.get(id=domain.logo_id, **kwargs)
+
+
 class UploadLogo(operation.Update):
 
     def pre(self, session, id, token, file, **kwargs):
@@ -125,12 +144,67 @@ class Activate(operation.Create):
         return True
 
 
+class CreateSetting(operation.Update):
+
+    def pre(self, session, id: str, **kwargs) -> bool:
+        self.key = kwargs.get('key', None)
+        self.value = kwargs.get('value', None)
+
+        if not self.key or not self.value:
+            raise exception.BadRequest()
+        return super().pre(session=session, id=id)
+
+    def do(self, session, **kwargs):
+        setting = self.entity.create_setting(self.key, self.value)
+        super().do(session)
+
+        return setting
+
+
+class UpdateSetting(operation.Update):
+
+    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
+        self.setting_id = setting_id
+        self.key = kwargs.get('key', None)
+        self.value = kwargs.get('value', None)
+        if not (self.key and self.value and self.setting_id):
+            raise exception.BadRequest()
+        return super().pre(session=session, id=id)
+
+    def do(self, session, **kwargs):
+        setting = self.entity.update_setting(self.setting_id,
+                                             self.key,
+                                             self.value)
+        super().do(session)
+
+        return setting
+
+
+class RemoveSetting(operation.Update):
+
+    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
+        self.setting_id = setting_id
+        super().pre(session, id=id)
+
+        return self.entity.is_stable()
+
+    def do(self, session, **kwargs):
+        setting = self.entity.remove_setting(self.setting_id)
+        super().do(session=session)
+
+        return setting
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
         super(Manager, self).__init__(driver)
         self.domain_by_name = DomainByName(self)
+        self.domain_logo_by_name = DomainLogoByName(self)
         self.upload_logo = UploadLogo(self)
         self.remove_logo = RemoveLogo(self)
         self.register = Register(self)
         self.activate = Activate(self)
+        self.create_setting = CreateSetting(self)
+        self.update_setting = UpdateSetting(self)
+        self.remove_setting = RemoveSetting(self)

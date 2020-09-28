@@ -17,6 +17,13 @@ class Router(router.Router):
                 'bypass': True
             },
             {
+                'action': 'Get Domain Logo By Name',
+                'method': 'GET',
+                'url': '/domainlogobyname',
+                'callback': self.controller.domain_logo_by_name,
+                'bypass': True
+            },
+            {
                 'action': 'Upload logo to Domain',
                 'method': 'PUT',
                 'url': self.resource_url + '/logo',
@@ -41,5 +48,26 @@ class Router(router.Router):
                 'url': self.resource_enum_url + '/activate/<id2>',
                 'callback': self.controller.activate,
                 'bypass': True
+            },
+            {
+                'action': 'Create a setting Domain',
+                'method': 'POST',
+                'url': self.resource_url + '/settings',
+                'callback': self.controller.create_setting,
+                'bypass': False
+            },
+            {
+                'action': 'Update a setting Domain',
+                'method': 'PUT',
+                'url': self.resource_enum_url + '/settings/<id2>',
+                'callback': self.controller.update_setting,
+                'bypass': False
+            },
+            {
+                'action': 'Remove a setting Domain',
+                'method': 'DELETE',
+                'url': self.resource_enum_url + '/settings/<id2>',
+                'callback': self.controller.remove_setting,
+                'bypass': False
             }
         ]

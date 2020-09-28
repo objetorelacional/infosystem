@@ -1,10 +1,8 @@
 from typing import List
 
-from infosystem.common.subsystem import manager
-from infosystem.common import exception
-from infosystem.common import utils
+from infosystem.common import exception, utils
 from infosystem.common.input import RouteResource
-from infosystem.common.subsystem import operation
+from infosystem.common.subsystem import manager, operation
 from infosystem.subsystem.capability.resource import Capability
 from infosystem.subsystem.route.resource import Route
 
@@ -61,8 +59,20 @@ class CreateCapabilities(operation.Operation):
         session.bulk_save_objects(capabilities)
 
 
+class Delete(operation.Delete):
+
+    def pre(self, session, id, **kwargs):
+        super().pre(session, id=id)
+        policies = self.manager.api.policies.list(capability_id=id)
+        if policies:
+            message = 'You can\'t remove this capability because' + \
+                ' there are policies associated'
+            raise exception.BadRequest(message)
+
+
 class Manager(manager.Manager):
 
     def __init__(self, driver):
         super().__init__(driver)
         self.create_capabilities = CreateCapabilities(self)
+        self.delete = Delete(self)
