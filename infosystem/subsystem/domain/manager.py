@@ -1,6 +1,7 @@
 from infosystem.common import exception
 from infosystem.subsystem.domain import tasks
 from infosystem.common.subsystem import operation, manager
+from infosystem.subsystem.image.resource import QualityImage
 
 
 class DomainByName(operation.Operation):
@@ -37,7 +38,7 @@ class DomainLogoByName(operation.Operation):
         if domain.logo_id is None:
             raise exception.NotFound('ERROR! Domain logo not found')
 
-        kwargs['quality'] = None
+        kwargs['quality'] = kwargs.get('quality', QualityImage.med)
         return self.manager.api.images.get(id=domain.logo_id, **kwargs)
 
 
