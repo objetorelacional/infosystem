@@ -5,6 +5,7 @@ import flask
 from infosystem.common import exception, utils
 from infosystem.common.exception import BadRequest, InfoSystemException
 from infosystem.common.subsystem import controller
+from infosystem.subsystem.image.resource import QualityImage
 
 
 class Controller(controller.Controller):
@@ -38,9 +39,13 @@ class Controller(controller.Controller):
 
     def domain_logo_by_name(self):
         try:
+            kwargs = {}
+            quality = flask.request.args.get('quality', None)
+            kwargs['quality'] = \
+                QualityImage[quality] if quality else QualityImage.med
             name = self._get_name_in_args()
             folder, filename = self.manager.domain_logo_by_name(
-                domain_name=name)
+                domain_name=name, **kwargs)
             return flask.send_from_directory(folder, filename)
         except KeyError:
             return self.get_bad_request('Unknown Quality')
