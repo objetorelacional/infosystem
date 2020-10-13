@@ -1,8 +1,27 @@
 import flask
 
+from enum import Enum
 from infosystem.common import exception, utils
 # TODO(samueldmq): find a better name to this
 # from infosystem.common.subsystem import manager as m
+
+
+class ListOptions(Enum):
+    ACTIVE_ONLY = {'id': 0, 'value': True}
+    INACTIVE_ONLY = {'id': 1, 'value': False}
+    ACTIVE_AND_INACTIVE = {'id': 2, 'value': None}
+
+    @classmethod
+    def new(cls, option):
+        if option:
+            return ListOptions[option]
+        else:
+            return ListOptions.ACTIVE_ONLY
+
+    @classmethod
+    def invalid_message_error(cls):
+        return 'Invalid list_options.\nAvailables options are {}'.\
+                format(', '.join(ListOptions. _member_names_))
 
 
 class Controller(object):
@@ -42,6 +61,22 @@ class Controller(object):
             _filters_cleanup.pop(k)
 
         return _filters_cleanup
+
+    def _parse_list_options(self, filters):
+        _filters = filters.copy()
+        options = _filters.pop('list_options', None)
+        if 'active' in _filters.keys():
+            return _filters
+        try:
+            options = ListOptions.new(options)
+        except KeyError:
+            raise exception.BadRequest(ListOptions.invalid_message_error())
+
+        value = options.value['value']
+        if value is not None:
+            _filters['active'] = value
+
+        return _filters
 
     def _get_include_dict(self, query_arg, filter_args):
         lists = [li.split('.') for li in query_arg.split(',')]
@@ -122,6 +157,7 @@ class Controller(object):
         filters = self._filters_cleanup(filters)
 
         try:
+            filters = self._parse_list_options(filters)
             entities = self.manager.list(**filters)
         except exception.InfoSystemException as exc:
             return flask.Response(response=exc.message,
