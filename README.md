@@ -2,7 +2,7 @@
 
 # InfoSystem
 
-O Infosystem é um framework open source para crianção de APIS rest. Ele foi
+O Infosystem é um framework open source para criação de API REST. Ele foi
 criado para dar poder ao desenvolvedor, permitindo focar no desenvolvimento do
 produto e das regras de negócio em vez de problemas de engenharia.
 
