@@ -39,4 +39,4 @@ Date: Thu, 15 Oct 2020 13:08:19 GMT
 ```
 
 Com a sua API criada, siga para nossa [documentação](https://infosystem.readthedocs.io/en/latest/) e aproveite o poder e a facilidade
-do infosystem no seu negócio ou na sua nova ideia: 
+do infosystem no seu negócio ou na sua nova ideia.
