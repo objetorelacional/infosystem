@@ -20,14 +20,14 @@ system.run()
 
 Abra um terminal e rode os seguintes comandos:
 
-```
+```bash
 $ pip install infosystem
 $ python3 app.py
 ```
 
 Sua API está rodando e pronta para ser consumida. Vamos testar com uma requisição:
 
-```
+```bash
 $ curl -i http://127.0.0.1:5000/
 HTTP/1.0 200 OK
 Content-Type: text/html; charset=utf-8
