@@ -2,69 +2,102 @@
 # List of exclusive SYSDAMIN role policies
 # The role SYSADMIN is exclusive for DEFAULT application
 SYSADMIN_EXCLUSIVE_POLICIES = [
-    ("/applications", ["POST", "PUT", "DELETE"]),
-    # ("/applications/<id>", ["GET"]),
-    ("/domains", ["POST", "GET", "DELETE"]),
-    ("/domains/<id>", ["PUT"]),
+    ('/applications', ['POST']),
+    ('/applications/<id>', ['PUT', 'DELETE']),
 
-    ("/capabilities", ["PUT", "GET", "DELETE"]),
-    ("/capabilities/<id>", ["POST", "GET"]),
+    ('/domains', ['POST', 'GET']),
+    ('/domains/<id>', ['DELETE']),
 
-    ("/policies", ["PUT", "GET", "DELETE"]),
-    ("/policies/<id>", ["POST", "GET"]),
+    ('/capabilities', ['POST']),
+    ('/capabilities/<id>', ['PUT', 'DELETE']),
 
-    ("/roles", ["PUT", "GET", "DELETE"]),
-    ("/roles/<id>", ["POST", "GET"])
+    # ('/capabilities', ['PUT', 'GET', 'DELETE']),
+    # ('/capabilities/<id>', ['POST', 'GET']),
 
-    # ("POST", "/applications"),
-    # ("GET", "/applications"),
-    # ("PUT", "/applications/<id>"),
-    # ("DELETE", "/applications/<id>"),
+    ('/policies', ['POST']),
+    ('/policies/<id>', ['PUT', 'DELETE']),
 
-    # ("POST", "/domains"),
-    # ("GET", "/domains"),
-    # ("DELETE", "/domains/<id>"),
+    ('/roles', ['POST']),
+    ('/roles/<id>', ['PUT', 'DELETE'])
 
-    # ("POST", "/capabilities"),
-    # ("PUT", "/capabilities/<id>"),
-    # ("DELETE", "/capabilities/<id>"),
+    # ('POST', '/applications'),
+    # ('GET', '/applications'),
+    # ('PUT', '/applications/<id>'),
+    # ('DELETE', '/applications/<id>'),
 
-    # ("POST", "/policies"),
-    # ("PUT", "/policies/<id>"),
-    # ("DELETE", "/policies/<id>"),
+    # ('POST', '/domains'),
+    # ('GET', '/domains'),
+    # ('DELETE', '/domains/<id>'),
 
-    #  ("POST", "/roles"),
-    #  ("PUT", "/roles/<id>"),
-    #  ("DELETE", "/roles/<id>")
+    # ('POST', '/capabilities'),
+    # ('PUT', '/capabilities/<id>'),
+    # ('DELETE', '/capabilities/<id>'),
+
+    # ('POST', '/policies'),
+    # ('PUT', '/policies/<id>'),
+    # ('DELETE', '/policies/<id>'),
+
+    #  ('POST', '/roles'),
+    #  ('PUT', '/roles/<id>'),
+    #  ('DELETE', '/roles/<id>')
 ]
 
 SYSADMIN_RESOURCES = [
-    ("/applications", ["POST", "PUT", "GET", "DELETE"]),
-    ("/domains", ["POST", "PUT", "GET", "DELETE"]),
-    ("/capabilities", ["POST", "PUT", "GET", "DELETE"]),
-    ("/policies", ["POST", "PUT", "GET", "DELETE"]),
-    ("/roles", ["POST", "PUT", "GET", "DELETE"]),
-    ("/images", ["POST", "PUT", "GET", "DELETE"]),
-    ("/files", ["POST", "PUT", "GET", "DELETE"]),
-    ("/routes", ["POST", "PUT", "GET", "DELETE"]),
+    ('/applications', ['GET']),
+    ('/applications/<id>', ['GET']),
 
-    ("/grants", ["POST", "PUT", "GET", "DELETE"]),
-    ("/notifications", ["POST", "PUT", "GET", "DELETE"]),
-    ("/tags", ["POST", "PUT", "GET", "DELETE"]),
-    ("/tokens", ["POST", "PUT", "GET", "DELETE"]),
-    ("/users", ["POST", "PUT", "GET", "DELETE"])
+    ('/domains/<id>', ['PUT', 'GET']),
+    ('/domains/<id>/settings', ['POST']),
+    ('/domains/<id1>/settings/<id2>', ['PUT', 'DELETE']),
+    ('/domains/<id>/logo', ['PUT', 'DELETE']),
+
+    ('/capabilities', ['GET']),
+    ('/capabilities/<id>', ['GET']),
+
+    ('/policies', ['GET']),
+    ('/policies/<id>', ['GET']),
+
+    ('/roles', ['GET']),
+    ('/roles/<id>', ['GET']),
+
+    ('/images', ['POST', 'GET']),
+    ('/images/<id>', ['PUT', 'DELETE']),
+
+    ('/files', ['POST', 'GET']),
+    ('/files/<id>', ['PUT', 'GET', 'DELETE']),
+
+    ('/routes', ['POST', 'GET']),
+    ('/routes/<id>', ['PUT', 'GET', 'DELETE']),
+
+    ('/grants', ['POST', 'GET']),
+    ('/grants/<id>', ['PUT', 'GET', 'DELETE']),
+
+    ('/notifications', ['POST', 'GET']),
+    ('/notifications/<id>', ['PUT', 'GET', 'DELETE']),
+
+    ('/tags', ['POST', 'GET']),
+    ('/tags/<id>', ['PUT', 'GET', 'DELETE']),
+
+    ('/tokens', ['GET']),
+    ('/tokens/<id>', ['DELETE']),
+
+    ('/users', ['POST', 'GET']),
+    ('/users/<id>', ['DELETE']),
+    ('/users/<id>/reset', ['POST']),
+    ('/users/reset', ['POST'])
 ]
 
 # Common resources for all users
 USER_RESOURCES = [
-    ("/tokens", ["GET", "POST"]),
-    ("/tokens/<id>", ["GET"]),
-    ("/applications/<id>", ["GET"]),
-    ("/domains/<id>", ["GET"]),
-    ("/images/<id>", ["GET"]),
-    ("/users/<id>", ["GET", "PUT"]),
-    ("/users/<id>/photo", ["PUT", "DELETE"]),
-    ("/users/<id>/notify", ["POST"]),
-    ("/users/<id>/update_my_password", ["PUT"]),
-    ("/users/routes", ["GET"])
+    ('/tokens', ['POST']),
+    ('/tokens/<id>', ['GET']),
+    ('/applications/<id>', ['GET']),
+    ('/domains/<id>', ['GET']),
+    ('/images/<id>', ['GET']),
+
+    ('/users/<id>', ['GET', 'PUT']),
+    ('/users/<id>/photo', ['PUT', 'DELETE']),
+    ('/users/<id>/notify', ['POST']),
+    ('/users/<id>/update_my_password', ['PUT']),
+    ('/users/routes', ['GET'])
 ]
