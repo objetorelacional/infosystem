@@ -11,6 +11,7 @@ class Delete(operation.Delete):
             message = 'You can\'t remove this capability because' + \
                 ' there are policies associated'
             raise exception.BadRequest(message)
+        return True
 
 
 class Manager(manager.Manager):
