@@ -48,7 +48,30 @@ Your API is ready to be consumed. Let's test with a requisition:
   1.0.0%
 
 
+The infosystem is very concerned with the application security. It requires in
+every requisition a token provided by itself. To get the token:
 
+.. code-block:: console
+
+    $ curl -s -X POST http://127.0.0.1:5000/tokens -H "Content-Type: application/json" --data '{
+        "username": "sysadmin",
+        "password": "123456",
+        "domain_name": "default"
+    }' | python -mjson.tool
+
+You will receive a response like this:
+
+.. code-block:: json
+
+  {
+    "token": {
+        "user_id": "afeee5968727407f916ac094f6cdeb68",
+        "id": "9fa6486d35b546de8204504dfc4f14f4",
+        "active": true,
+        "created_at": "2020-10-22T11:47:59.200842Z",
+        "created_by": "afeee5968727407f916ac094f6cdeb68"
+    }
+  }
 
 
 For learning more about infosystem, please follow to our :doc:`quickstart <quick_start>`
