@@ -34,6 +34,11 @@ class CreatePolicies(operation.Operation):
                 resources is None):
             raise exception.OperationBadRequest()
 
+        try:
+            self.manager.api.applications.get(id=self.application_id)
+        except exception.NotFound:
+            raise exception.BadRequest('Invalid application')
+
         routes = self.manager.api.routes.list(
             sysadmin=False, bypass=False, active=True)
         capabilities = self.manager.api.capabilities.list(
