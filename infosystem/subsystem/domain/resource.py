@@ -8,6 +8,8 @@ from infosystem.common import exception
 
 class Domain(entity.Entity, db.Model):
 
+    DEFAULT = 'default'
+
     attributes = ['name', 'display_name', 'parent_id',
                   'application_id', 'logo_id', 'doc', 'description']
     attributes += entity.Entity.attributes
