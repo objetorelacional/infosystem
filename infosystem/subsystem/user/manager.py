@@ -128,14 +128,15 @@ class Routes(operation.Operation):
 class Authorization(operation.Operation):
 
     def do(self, session, user_id, route, **kwargs):
-        has_capabilities = session.query(User). \
+        has_capabilities = session.query(User.id). \
             join(Domain). \
             join(Grant). \
             join(Role). \
             join(Policy). \
             join(Capability,
                  and_(Capability.id == Policy.capability_id,
-                      Capability.application_id == Domain.application_id)). \
+                      Capability.application_id == Domain.application_id,
+                      Capability.route_id == route.id)). \
             filter(and_(User.id == user_id,
                         or_(not route.sysadmin, Role.name == 'sysadmin'),
                         User.active, Domain.active, Grant.active,
