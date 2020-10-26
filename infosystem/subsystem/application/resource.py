@@ -5,6 +5,8 @@ from infosystem.common.subsystem import entity
 
 class Application(entity.Entity, db.Model):
 
+    DEFAULT = "default"
+
     attributes = ['name', 'description']
     attributes += entity.Entity.attributes
 
