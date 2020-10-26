@@ -8,13 +8,13 @@ REQUIRED_PACKAGES = [
     'gabbi',
     'pika',
     'sparkpost',
-    'celery==4.4.3',
+    'celery',
     'pillow'
 ]
 
 setup(
     name='infosystem',
-    version='0.2.24',
+    version='0.3.0',
     summary='Infosystem Framework',
     url='https://github.com/objetorelacional/infosystem',
     author='Samuel de Medeiros Queiroz, Francois Oliveira',
