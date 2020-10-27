@@ -30,8 +30,7 @@ class CreatePolicies(operation.Operation):
         self.application_id = kwargs.get('application_id', None)
         resources = kwargs.get('resources', None)
 
-        if ((not (self.role_id and self.application_id)) or
-                resources is None):
+        if ((not (self.role_id and self.application_id)) or resources is None):
             raise exception.OperationBadRequest()
 
         try:
