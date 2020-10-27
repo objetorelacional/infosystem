@@ -3,7 +3,7 @@ import json
 import flask
 
 from infosystem.common import exception, utils
-from infosystem.common.exception import BadRequest, InfoSystemException
+from infosystem.common.exception import BadRequest
 from infosystem.common.subsystem import controller
 from infosystem.subsystem.image.resource import QualityImage
 

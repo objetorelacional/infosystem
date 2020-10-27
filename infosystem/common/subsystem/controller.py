@@ -21,7 +21,7 @@ class ListOptions(Enum):
     @classmethod
     def invalid_message_error(cls):
         return 'Invalid list_options.\nAvailables options are {}'.\
-                format(', '.join(ListOptions. _member_names_))
+            format(', '.join(ListOptions. _member_names_))
 
 
 class Controller(object):

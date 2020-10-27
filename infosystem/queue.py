@@ -1,7 +1,7 @@
 import flask
 from typing import Any
 from pika import BlockingConnection, PlainCredentials, \
-                 ConnectionParameters, BasicProperties
+    ConnectionParameters, BasicProperties
 from infosystem.celery import celery
 
 

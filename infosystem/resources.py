@@ -18,7 +18,12 @@ SYSADMIN_EXCLUSIVE_POLICIES = [
     ('/policies/<id>', ['PUT', 'DELETE']),
 
     ('/roles', ['POST']),
-    ('/roles/<id>', ['PUT', 'DELETE'])
+    ('/roles/<id>', ['PUT', 'DELETE']),
+    ('/roles/<id>/policies', ['POST']),
+
+    ('/routes', ['POST']),
+    ('/routes/<id>', ['PUT', 'DELETE'])
+
 
     # ('POST', '/applications'),
     # ('GET', '/applications'),
@@ -45,6 +50,7 @@ SYSADMIN_EXCLUSIVE_POLICIES = [
 SYSADMIN_RESOURCES = [
     ('/applications', ['GET']),
     ('/applications/<id>', ['GET']),
+    ('/applications/<id>/roles', ['GET']),
 
     ('/domains/<id>', ['PUT', 'GET']),
     ('/domains/<id>/settings', ['POST']),
@@ -90,7 +96,7 @@ SYSADMIN_RESOURCES = [
 # Common resources for all users
 USER_RESOURCES = [
     ('/tokens', ['POST']),
-    ('/tokens/<id>', ['GET']),
+    ('/tokens/<id>', ['GET', 'DELETE']),
     ('/applications/<id>', ['GET']),
     ('/domains/<id>', ['GET']),
     ('/images/<id>', ['GET']),
