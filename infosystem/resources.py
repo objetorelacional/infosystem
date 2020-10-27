@@ -11,9 +11,6 @@ SYSADMIN_EXCLUSIVE_POLICIES = [
     ('/capabilities', ['POST']),
     ('/capabilities/<id>', ['PUT', 'DELETE']),
 
-    # ('/capabilities', ['PUT', 'GET', 'DELETE']),
-    # ('/capabilities/<id>', ['POST', 'GET']),
-
     ('/policies', ['POST']),
     ('/policies/<id>', ['PUT', 'DELETE']),
 
@@ -23,28 +20,6 @@ SYSADMIN_EXCLUSIVE_POLICIES = [
 
     ('/routes', ['POST']),
     ('/routes/<id>', ['PUT', 'DELETE'])
-
-
-    # ('POST', '/applications'),
-    # ('GET', '/applications'),
-    # ('PUT', '/applications/<id>'),
-    # ('DELETE', '/applications/<id>'),
-
-    # ('POST', '/domains'),
-    # ('GET', '/domains'),
-    # ('DELETE', '/domains/<id>'),
-
-    # ('POST', '/capabilities'),
-    # ('PUT', '/capabilities/<id>'),
-    # ('DELETE', '/capabilities/<id>'),
-
-    # ('POST', '/policies'),
-    # ('PUT', '/policies/<id>'),
-    # ('DELETE', '/policies/<id>'),
-
-    #  ('POST', '/roles'),
-    #  ('PUT', '/roles/<id>'),
-    #  ('DELETE', '/roles/<id>')
 ]
 
 SYSADMIN_RESOURCES = [
