@@ -111,10 +111,6 @@ class SystemFlask(flask.Flask):
                       self.sysadmin_resources,
                       self.sysadmin_exclusive_resources).\
                 execute()
-            # if not self.subsystems['applications'].manager.list():
-            #     default_application = self.create_default_application()
-            #     if not self.subsystems['domains'].manager.list():
-            #         self.create_default_domain(default_application.id)
 
     def _parse_systems(self, systems):
         user_resources = []

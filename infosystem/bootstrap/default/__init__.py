@@ -27,7 +27,7 @@ class BootstrapDefault(object):
 
         application = self.bootstrap_application.execute()
         domain = self.bootstrap_domain.execute(application.id)
-        user = self.bootstrap_user.execute(domain.id, role_sysadmin.id)
+        self.bootstrap_user.execute(domain.id, role_sysadmin.id)
         self.bootstrap_policies.execute(application.id,
                                         role_sysadmin.id,
                                         user_resources,

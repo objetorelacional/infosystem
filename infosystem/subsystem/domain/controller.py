@@ -3,7 +3,7 @@ import json
 import flask
 
 from infosystem.common import exception, utils
-from infosystem.common.exception import BadRequest, InfoSystemException
+from infosystem.common.exception import BadRequest
 from infosystem.common.subsystem import controller
 from infosystem.subsystem.image.resource import QualityImage
 
@@ -18,11 +18,6 @@ class Controller(controller.Controller):
         name = flask.request.args.get('name', None)
         if not name:
             raise BadRequest()
-        if name == 'default':
-            e = InfoSystemException()
-            e.status = 403
-            e.message = 'Forbidden'
-            raise e
         return name
 
     def domain_by_name(self):
