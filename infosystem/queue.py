@@ -2,7 +2,7 @@ import flask
 from typing import Any
 from pika import BlockingConnection, PlainCredentials, \
     ConnectionParameters, BasicProperties
-from infosystem.celery import celery
+from infosystem.celery import celery, decide_on_run
 
 
 class RabbitMQ:
@@ -58,6 +58,7 @@ class ProducerQueue:
         self.connection.close()
 
 
+@decide_on_run
 @celery.task
 def publish_body_priority(exchange: str,
                           priority: int,
