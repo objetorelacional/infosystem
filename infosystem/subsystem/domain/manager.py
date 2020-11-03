@@ -114,7 +114,7 @@ class Register(operation.Create):
 
     def post(self):
         # The notification don't be part of transaction must be on post
-        tasks.send_email.delay(self.user.id)
+        tasks.send_email(self.user.id)
 
 
 class Activate(operation.Create):
