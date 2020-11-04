@@ -64,8 +64,7 @@ SYSADMIN_RESOURCES = [
 
     ('/users', ['POST', 'GET']),
     ('/users/<id>', ['DELETE']),
-    ('/users/<id>/reset', ['POST']),
-    ('/users/reset', ['POST'])
+    ('/users/<id>/reset', ['POST'])
 ]
 
 # Common resources for all users
@@ -80,5 +79,6 @@ USER_RESOURCES = [
     ('/users/<id>/photo', ['PUT', 'DELETE']),
     ('/users/<id>/notify', ['POST']),
     ('/users/<id>/update_my_password', ['PUT']),
-    ('/users/routes', ['GET'])
+    ('/users/routes', ['GET']),
+    ('/users/reset', ['POST'])
 ]
