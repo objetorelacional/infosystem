@@ -51,6 +51,7 @@ class SystemFlask(flask.Flask):
         self.schedule_jobs()
 
         self.bootstrap()
+        self.configure_celery()
 
         self.before_request(
             request.RequestManager(self.subsystems).before_request)
@@ -59,6 +60,7 @@ class SystemFlask(flask.Flask):
         self.config['BASEDIR'] = os.path.abspath(os.path.dirname(__file__))
         self.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
         self.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        self.config['USE_WORKER'] = False
 
     def init_database(self):
         database.db.init_app(self)
@@ -132,5 +134,7 @@ class SystemFlask(flask.Flask):
         return (subsystems, user_resources,
                 sysadmin_resources, sysadmin_exclusive_resources)
 
-    def init_celery(self):
-        celery.init_celery(self)
+    def configure_celery(self):
+        use_worker = self.config.get('USE_WORKER', False)
+        if use_worker:
+            celery.init_celery(self)

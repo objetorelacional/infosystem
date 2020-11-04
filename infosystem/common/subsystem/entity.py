@@ -73,16 +73,20 @@ class Entity(object):
 
     def to_dict(self, include_dict=None, stringify=True):
         d = {}
+        include_dict = include_dict or {}
 
         for attr in self.__class__.attributes:
-            value = getattr(self, attr)
-            if value is not None:
-                if isinstance(value, Enum):
-                    d[attr] = value.name
-                elif isinstance(value, Decimal):
-                    d[attr] = self.convert_numeric(value)
-                else:
-                    d[attr] = value
+            if attr not in include_dict:
+                value = getattr(self, attr)
+                if value is not None:
+                    if isinstance(value, Enum):
+                        d[attr] = value.name
+                    elif isinstance(value, Decimal):
+                        d[attr] = self.convert_numeric(value)
+                    elif isinstance(value, Entity):
+                        include_dict.update({attr: {}})
+                    else:
+                        d[attr] = value
                 # TODO(fdoliveira) Why change format of date and datetime?
                 # if stringify and isinstance(value, datetime):
                 #    d[attr] = value.strftime(DATETIME_FMT)
@@ -90,7 +94,6 @@ class Entity(object):
                 #    d[attr] = value.strftime(DATETIME_FMT)
                 # else:
 
-        include_dict = include_dict or {}
         # Only embedded that are not in include will be updated
         # include_dict.update({attr: {} for attr in self.embedded()})
         for attr in self.embedded():
