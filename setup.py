@@ -3,8 +3,9 @@ from setuptools import setup, find_packages
 REQUIRED_PACKAGES = [
     'apscheduler',
     'flask',
-    'flask-sqlalchemy',
     'flask-rbac',
+    'flask-sqlalchemy',
+    'sqlalchemy-json',
     'gabbi',
     'pika',
     'sparkpost',
