@@ -28,8 +28,7 @@ SYSADMIN_RESOURCES = [
     ('/applications/<id>/roles', ['GET']),
 
     ('/domains/<id>', ['PUT', 'GET']),
-    ('/domains/<id>/settings', ['POST']),
-    ('/domains/<id1>/settings/<id2>', ['PUT', 'DELETE']),
+    ('/domains/<id>/settings', ['POST', 'PUT', 'DELETE']),
     ('/domains/<id>/logo', ['PUT', 'DELETE']),
 
     ('/capabilities', ['GET']),
@@ -73,6 +72,7 @@ USER_RESOURCES = [
     ('/tokens/<id>', ['GET', 'DELETE']),
     ('/applications/<id>', ['GET']),
     ('/domains/<id>', ['GET']),
+    ('/domains/<id>/settings', ['GET']),
     ('/images/<id>', ['GET']),
 
     ('/users/<id>', ['GET', 'PUT']),
