@@ -1,5 +1,6 @@
-import uuid
-from sqlalchemy import orm, UniqueConstraint
+from typing import Any
+from sqlalchemy import orm
+from sqlalchemy_json import NestedMutableJson
 
 from infosystem.database import db
 from infosystem.common.subsystem import entity
@@ -11,7 +12,7 @@ class Domain(entity.Entity, db.Model):
     DEFAULT = 'default'
 
     attributes = ['name', 'display_name', 'parent_id',
-                  'application_id', 'logo_id', 'doc', 'description']
+                  'application_id', 'logo_id', 'doc', 'description', 'settings']
     attributes += entity.Entity.attributes
 
     application_id = db.Column(
@@ -31,9 +32,7 @@ class Domain(entity.Entity, db.Model):
     contacts = orm.relationship(
         'DomainContact', backref=orm.backref('domain_contacts'),
         cascade='delete,delete-orphan,save-update')
-    settings = orm.relationship(
-        'DomainSetting', backref=orm.backref('domain_setting'),
-        cascade='delete,delete-orphan,save-update')
+    _settings = db.Column(NestedMutableJson, nullable=False, default={})
 
     __tablename__ = 'domain'
 
@@ -62,28 +61,33 @@ class Domain(entity.Entity, db.Model):
                 'Erro! Setting não encontrado nesse domínio')
         return setting
 
-    def remove_setting(self, setting_id: str):
-        setting = self._get_setting(setting_id)
-        self.settings.remove(setting)
-        return setting
+    def _has_setting(self, key: str) -> bool:
+        return self._settings.get(key) is not None
 
-    def create_setting(self, key: str, value: str):
-        setting = DomainSetting(id=uuid.uuid4().hex,
-                                domain_id=self.id,
-                                key=key,
-                                value=value)
-        self.settings.append(setting)
+    def remove_setting(self, key: str):
+        if not self._has_setting(key):
+            raise exception.BadRequest(f"Erro! Setting {key} not exists")
 
-        return setting
+        value = self._settings.pop(key)
+        return value
 
-    def update_setting(self, setting_id: str, key: str, value: str):
-        setting = self._get_setting(setting_id)
-        if setting.key != key:
-            raise exception.BadRequest(
-                "Erro! You can't update the key. Remove and Create another")
+    def create_setting(self, key: str, value: Any):
+        if self._has_setting(key):
+            raise exception.BadRequest(f"Erro! Setting {key} already exists")
 
-        setting.value = value
-        return setting
+        self._settings[key] = value
+        return value
+
+    def update_setting(self, key: str, value: Any):
+        if not self._has_setting(key):
+            raise exception.BadRequest(f"Erro! Setting {key} not exists")
+
+        self._settings[key] = value
+        return value
+
+    @property
+    def settings(self):
+        return self._settings
 
     @classmethod
     def embedded(cls):
@@ -134,26 +138,3 @@ class DomainContact(entity.Entity, db.Model):
                          updated_at, updated_by, tag)
         self.domain_id = domain_id
         self.contact = contact
-
-
-class DomainSetting(entity.Entity, db.Model):
-
-    attributes = ['id', 'key', 'value']
-
-    domain_id = db.Column(
-        db.CHAR(32), db.ForeignKey("domain.id"), nullable=False)
-    key = db.Column(db.String(100), nullable=False)
-    value = db.Column(db.String(1000), nullable=False)
-
-    def __init__(self, id, domain_id, key, value,
-                 active=True, created_at=None, created_by=None,
-                 updated_at=None, updated_by=None, tag=None):
-        super().__init__(id, active, created_at, created_by,
-                         updated_at, updated_by, tag)
-        self.domain_id = domain_id
-        self.key = key
-        self.value = value
-
-    __table_args__ = (
-        UniqueConstraint('key', 'domain_id',
-                         name='settings_key_domain_id_uk'),)

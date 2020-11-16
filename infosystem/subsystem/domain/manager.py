@@ -16,7 +16,7 @@ class DomainByName(operation.Operation):
             raise exception.NotFound('ERROR! Domain name not found')
         domain = domains[0]
 
-        # Hide user ID from public resources
+        # Hide user ID and settings from public resources
         domain.created_by = None
         domain.updated_by = None
 
@@ -145,55 +145,80 @@ class Activate(operation.Create):
         return True
 
 
-class CreateSetting(operation.Update):
+class CreateSettings(operation.Update):
 
     def pre(self, session, id: str, **kwargs) -> bool:
-        self.key = kwargs.get('key', None)
-        self.value = kwargs.get('value', None)
+        self.settings = kwargs
 
-        if not self.key or not self.value:
-            raise exception.BadRequest()
+        if self.settings is None or not self.settings:
+            raise exception.BadRequest("Erro! There is not a setting")
+
         return super().pre(session=session, id=id)
 
     def do(self, session, **kwargs):
-        setting = self.entity.create_setting(self.key, self.value)
+        result = {}
+        for key, value in self.settings.items():
+            new_value = self.entity.create_setting(key, value)
+            result[key] = new_value
         super().do(session)
 
-        return setting
+        return result
 
 
-class UpdateSetting(operation.Update):
+class UpdateSettings(operation.Update):
 
-    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
-        self.setting_id = setting_id
-        self.key = kwargs.get('key', None)
-        self.value = kwargs.get('value', None)
-        if not (self.key and self.value and self.setting_id):
-            raise exception.BadRequest()
+    def pre(self, session, id: str, **kwargs) -> bool:
+        self.settings = kwargs
+        if self.settings is None or not self.settings:
+            raise exception.BadRequest("Erro! There is not a setting")
         return super().pre(session=session, id=id)
 
     def do(self, session, **kwargs):
-        setting = self.entity.update_setting(self.setting_id,
-                                             self.key,
-                                             self.value)
+        result = {}
+        for key, value in self.settings.items():
+            new_value = self.entity.update_setting(key, value)
+            result[key] = new_value
         super().do(session)
 
-        return setting
+        return result
 
 
-class RemoveSetting(operation.Update):
+class RemoveSettings(operation.Update):
 
-    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
-        self.setting_id = setting_id
+    def pre(self, session, id: str, **kwargs) -> bool:
+        self.keys = kwargs.get('keys', [])
+        if not self.keys:
+            raise exception.BadRequest('Erro! keys are empty')
         super().pre(session, id=id)
 
         return self.entity.is_stable()
 
     def do(self, session, **kwargs):
-        setting = self.entity.remove_setting(self.setting_id)
+        result = {}
+        for key in self.keys:
+            value = self.entity.remove_setting(key)
+            result[key] = value
         super().do(session=session)
 
-        return setting
+        return result
+
+
+class GetDomainSettingsByKeys(operation.Get):
+
+    def pre(self, session, id, **kwargs):
+        self.keys = kwargs.get('keys', [])
+        if not self.keys:
+            raise exception.BadRequest('Erro! keys are empty')
+        return super().pre(session, id=id)
+
+    def do(self, session, **kwargs):
+        entity = super().do(session=session)
+        settings = {}
+        for key in self.keys:
+            value = entity.settings.get(key, None)
+            if value is not None:
+                settings[key] = value
+        return settings
 
 
 class Manager(manager.Manager):
@@ -206,6 +231,7 @@ class Manager(manager.Manager):
         self.remove_logo = RemoveLogo(self)
         self.register = Register(self)
         self.activate = Activate(self)
-        self.create_setting = CreateSetting(self)
-        self.update_setting = UpdateSetting(self)
-        self.remove_setting = RemoveSetting(self)
+        self.create_settings = CreateSettings(self)
+        self.update_settings = UpdateSettings(self)
+        self.remove_settings = RemoveSettings(self)
+        self.get_domain_settings_by_keys = GetDomainSettingsByKeys(self)
