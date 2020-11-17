@@ -1,6 +1,6 @@
+import json
 from typing import Any
 from sqlalchemy import orm
-from sqlalchemy_json import NestedMutableJson
 
 from infosystem.database import db
 from infosystem.common.subsystem import entity
@@ -32,7 +32,7 @@ class Domain(entity.Entity, db.Model):
     contacts = orm.relationship(
         'DomainContact', backref=orm.backref('domain_contacts'),
         cascade='delete,delete-orphan,save-update')
-    _settings = db.Column(NestedMutableJson, nullable=False, default={})
+    _settings = db.Column('settings', db.Text, nullable=False, default='{}')
 
     __tablename__ = 'domain'
 
@@ -53,41 +53,47 @@ class Domain(entity.Entity, db.Model):
         self.logo_id = logo_id
         self.parent_id = parent_id
 
-    def _get_setting(self, setting_id: str):
-        setting = next((s for s in self.settings if s.id == setting_id), None)
-
-        if not setting:
-            raise exception.NotFound(
-                'Erro! Setting não encontrado nesse domínio')
-        return setting
-
     def _has_setting(self, key: str) -> bool:
-        return self._settings.get(key) is not None
+        return self.settings.get(key) is not None
 
     def remove_setting(self, key: str):
         if not self._has_setting(key):
             raise exception.BadRequest(f"Erro! Setting {key} not exists")
 
-        value = self._settings.pop(key)
+        settings = self.settings
+        value = settings.pop(key)
+        self._save_settings(settings)
+
         return value
 
     def create_setting(self, key: str, value: Any):
         if self._has_setting(key):
             raise exception.BadRequest(f"Erro! Setting {key} already exists")
 
-        self._settings[key] = value
+        settings = self.settings
+        settings[key] = value
+        self._save_settings(settings)
         return value
 
     def update_setting(self, key: str, value: Any):
         if not self._has_setting(key):
             raise exception.BadRequest(f"Erro! Setting {key} not exists")
 
-        self._settings[key] = value
+        settings = self.settings
+        settings[key] = value
+        self._save_settings(settings)
         return value
 
     @property
     def settings(self):
-        return self._settings
+        try:
+            settings_str = '{}' if self._settings is None else self._settings
+            return json.loads(settings_str)
+        except Exception:
+            return {}
+
+    def _save_settings(self, settings: dict):
+        self._settings = json.dumps(settings, default=str)
 
     @classmethod
     def embedded(cls):
