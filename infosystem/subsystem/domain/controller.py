@@ -164,6 +164,9 @@ class Controller(controller.Controller):
 
     def _get_keys_from_args(self):
         keys = flask.request.args.get('keys')
+        if not keys:
+            raise exception.BadRequest(
+                'ERRO! The keys parameter was not passed correctly')
         return list(filter(None, keys.split(',')))
 
     def remove_settings(self, id):
