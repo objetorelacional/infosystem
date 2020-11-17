@@ -5,7 +5,6 @@ REQUIRED_PACKAGES = [
     'flask',
     'flask-rbac',
     'flask-sqlalchemy',
-    'sqlalchemy-json',
     'gabbi',
     'pika',
     'sparkpost',
@@ -15,7 +14,7 @@ REQUIRED_PACKAGES = [
 
 setup(
     name='infosystem',
-    version='1.0.3',
+    version='1.0.4',
     summary='Infosystem Framework',
     url='https://github.com/objetorelacional/infosystem',
     author='Samuel de Medeiros Queiroz, Francois Oliveira',
