@@ -26,8 +26,8 @@ class RabbitMQ:
 class ProducerQueue:
 
     def __init__(self):
-        rabbitMQ = RabbitMQ()
-        self.connection = rabbitMQ.connect()
+        rabbitmq = RabbitMQ()
+        self.connection = rabbitmq.connect()
         self.channel = self.connection.channel()
 
     def publish(self, exchange, routing_key, body, properties=None):
@@ -36,13 +36,32 @@ class ProducerQueue:
                                    body=body,
                                    properties=properties)
 
-    def publish_with_priority(self, exchange, routing_key, body,
-                              type, priority):
-        properties = BasicProperties(type=type, priority=priority)
+    def _publish_entity(self, exchange, routing_key, body,
+                        type, priority=None, headers=None):
+        properties = BasicProperties(
+            type=type, priority=priority, headers=headers)
         self.channel.basic_publish(exchange=exchange,
                                    routing_key=routing_key,
                                    body=body,
                                    properties=properties)
+
+    def publish_full_entity(self, exchange, routing_key, body,
+                            type, priority):
+        headers = {'event_type': 'FULL_ENTITY'}
+        self._publish_entity(exchange, routing_key, body,
+                             type, priority, headers)
+
+    def publish_request_entity(self, exchange, routing_key, body,
+                               type, priority):
+        headers = {'event_type': 'REQUEST_ENTITY'}
+        self._publish_entity(exchange, routing_key, body,
+                             type, priority, headers)
+
+    def publish_partial_entity(self, exchange, routing_key, body,
+                               type, priority, event_name):
+        headers = {'event_type': 'PARTIAL_ENTITY', 'event_name': event_name}
+        self._publish_entity(exchange, routing_key, body,
+                             type, priority, headers)
 
     def run(self, fn, *args):
         fn(self, *args)
