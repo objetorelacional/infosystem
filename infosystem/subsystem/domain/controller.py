@@ -25,7 +25,8 @@ class Controller(controller.Controller):
             name = self._get_name_in_args()
             domain = self.manager.domain_by_name(domain_name=name)
             domain_dict = domain.to_dict()
-            domain_dict.pop('settings')
+            if 'settings' in domain_dict.keys():
+                domain_dict.pop('settings')
             response = {self.resource_wrap: domain_dict}
             return flask.Response(response=json.dumps(response, default=str),
                                   status=200,

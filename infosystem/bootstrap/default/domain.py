@@ -21,6 +21,8 @@ class BootstrapDomain(object):
 
     def _save_domain(self, domain: Domain) -> Domain:
         data = domain.to_dict()
+        if 'settings' in data.keys():
+            data.pop('settings')
         data['addresses'] = []
         data['contacts'] = []
         return self.domain_manager.create(**data)
