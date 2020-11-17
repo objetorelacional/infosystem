@@ -2,7 +2,6 @@
 apscheduler
 flask
 flask-sqlalchemy
-sqlalchemy-json
 flask-rbac
 gabbi
 pika
