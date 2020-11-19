@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from infosystem.subsystem.application.resource import Application
 from typing import List
 from infosystem.common import exception
@@ -136,7 +137,8 @@ class GetRoles(operation.Operation):
         roles = session.query(Role). \
             join(Policy). \
             join(Capability). \
-            filter(Capability.application_id == self.application_id). \
+            filter(and_(Capability.application_id == self.application_id,
+                        Role.name != Role.USER)). \
             distinct()
         return roles
 
