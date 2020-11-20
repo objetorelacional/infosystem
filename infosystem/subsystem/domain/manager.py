@@ -77,6 +77,18 @@ class RemoveLogo(operation.Update):
 
 class Register(operation.Create):
 
+    def _register_domain(self, domain_name, domain_display_name,
+                         application_id, username, email, password):
+        self.domain = self.manager.api.domains.create(
+            application_id=application_id, name=domain_name,
+            display_name=domain_display_name,
+            addresses=[], contacts=[], active=False)
+
+        self.user = self.manager.api.users.create(
+            name=username, email=email, domain_id=self.domain.id, active=False)
+
+        self.manager.api.users.reset(id=self.user.id, password=password)
+
     def pre(self, session, username, email, password,
             domain_name, domain_display_name, application_name):
         self.username = username
@@ -101,14 +113,26 @@ class Register(operation.Create):
         return True
 
     def do(self, session, **kwargs):
-        domain = self.manager.api.domains.create(
-            application_id=self.application.id, name=self.domain_name,
-            display_name=self.domain_display_name, addresses=[], contacts=[],
-            active=False)
-        self.user = self.manager.api.users.create(
-            name=self.username, email=self.email,
-            domain_id=domain.id, active=False)
-        self.manager.api.users.reset(id=self.user.id, password=self.password)
+        domains = self.manager.api.domains.list(name=self.domain_name)
+        if not domains:
+            self._register_domain(
+                self.domain_name, self.domain_display_name, self.application.id,
+                self.username, self.email, self.password)
+        else:
+            domain = domains[0]
+
+            users = self.manager.api.users.list(email=self.email,
+                                                domain_id=domain.id)
+
+            if domain.active:
+                raise exception.BadRequest('Domain already activated')
+
+            if not users or domain.display_name != self.domain_display_name:
+                raise exception.BadRequest('Domain already registered')
+
+            self.user = users[0]
+            self.manager.api.users.reset(id=self.user.id,
+                                         password=self.password)
 
         return True
 
