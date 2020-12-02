@@ -64,8 +64,7 @@ class SystemFlask(flask.Flask):
 
     def init_database(self):
         database.db.init_app(self)
-        with self.app_context():
-            database.db.create_all()
+        database.migrate.init_app(self, database.db)
 
     def after_init_database(self):
         pass

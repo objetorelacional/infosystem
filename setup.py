@@ -5,6 +5,7 @@ REQUIRED_PACKAGES = [
     'flask',
     'flask-rbac',
     'flask-sqlalchemy',
+    'flask-migrate',
     'gabbi',
     'pika',
     'sparkpost',
