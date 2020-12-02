@@ -29,6 +29,7 @@ class SystemFlask(flask.Flask):
         super().__init__(__name__, static_folder=None)
 
         self.configure()
+        self.configure_commands()
         self.init_database()
         self.after_init_database()
 
@@ -61,6 +62,12 @@ class SystemFlask(flask.Flask):
         self.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
         self.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         self.config['USE_WORKER'] = False
+
+    def configure_commands(self):
+        bootstrap_decorator = self.cli.command(name='bootstrap',
+                                               help='Perform bootstrap')
+        bootstrap_command = bootstrap_decorator(self.bootstrap)
+        self.cli.add_command(bootstrap_command)
 
     def init_database(self):
         database.db.init_app(self)
