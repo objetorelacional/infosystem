@@ -29,6 +29,7 @@ class SystemFlask(flask.Flask):
         super().__init__(__name__, static_folder=None)
 
         self.configure()
+        self.configure_commands()
         self.init_database()
         self.after_init_database()
 
@@ -47,12 +48,6 @@ class SystemFlask(flask.Flask):
         # Add version in the root URL
         self.add_url_rule('/', view_func=self.version, methods=['GET'])
 
-        self.scheduler = scheduler.Scheduler()
-        self.schedule_jobs()
-
-        self.bootstrap()
-        self.configure_celery()
-
         self.before_request(
             request.RequestManager(self.subsystems).before_request)
 
@@ -62,10 +57,15 @@ class SystemFlask(flask.Flask):
         self.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         self.config['USE_WORKER'] = False
 
+    def configure_commands(self):
+        bootstrap_decorator = self.cli.command(name='bootstrap',
+                                               help='Perform bootstrap')
+        bootstrap_command = bootstrap_decorator(self.bootstrap)
+        self.cli.add_command(bootstrap_command)
+
     def init_database(self):
         database.db.init_app(self)
-        with self.app_context():
-            database.db.create_all()
+        database.migrate.init_app(self, database.db)
 
     def after_init_database(self):
         pass
@@ -138,3 +138,7 @@ class SystemFlask(flask.Flask):
         use_worker = self.config.get('USE_WORKER', False)
         if use_worker:
             celery.init_celery(self)
+
+    def init_scheduler(self):
+        self.scheduler = scheduler.Scheduler()
+        self.schedule_jobs()
