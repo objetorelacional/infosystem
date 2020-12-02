@@ -47,12 +47,6 @@ class SystemFlask(flask.Flask):
         # Add version in the root URL
         self.add_url_rule('/', view_func=self.version, methods=['GET'])
 
-        self.scheduler = scheduler.Scheduler()
-        self.schedule_jobs()
-
-        self.bootstrap()
-        self.configure_celery()
-
         self.before_request(
             request.RequestManager(self.subsystems).before_request)
 
@@ -138,3 +132,7 @@ class SystemFlask(flask.Flask):
         use_worker = self.config.get('USE_WORKER', False)
         if use_worker:
             celery.init_celery(self)
+
+    def init_scheduler(self):
+        self.scheduler = scheduler.Scheduler()
+        self.schedule_jobs()
