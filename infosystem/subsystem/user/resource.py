@@ -7,6 +7,8 @@ from infosystem.common.subsystem import entity
 
 class User(entity.Entity, db.Model):
 
+    SYSADMIN_USERNAME = 'sysadmin'
+
     attributes = ['domain_id', 'name', 'email', 'nickname', 'photo_id']
     attributes += entity.Entity.attributes
 

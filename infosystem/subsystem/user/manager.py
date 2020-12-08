@@ -179,7 +179,7 @@ class DeletePhoto(operation.Update):
 class Notify(operation.Operation):
 
     def _get_sysadmin(self):
-        users = self.manager.list(name='sysadmin')
+        users = self.manager.list(name=User.SYSADMIN_USERNAME)
         user = users[0] if users else None
         return user
 

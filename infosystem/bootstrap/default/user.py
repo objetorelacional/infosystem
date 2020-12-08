@@ -22,7 +22,7 @@ class BootstrapUser(object):
     def _get_user_default(self, domain_default_id: str) -> User:
         return User(id=utils.random_uuid(),
                     domain_id=domain_default_id,
-                    name='sysadmin',
+                    name=User.SYSADMIN_USERNAME,
                     email='sysadmin@example.com')
 
     def _get_grant_default(self, user_id: str, role_id: str) -> Grant:
