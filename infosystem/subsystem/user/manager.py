@@ -138,7 +138,7 @@ class Authorization(operation.Operation):
                       Capability.application_id == Domain.application_id,
                       Capability.route_id == route.id)). \
             filter(and_(User.id == user_id,
-                        or_(not route.sysadmin, Role.name == 'sysadmin'),
+                        or_(not route.sysadmin, Role.name == Role.SYSADMIN),
                         User.active, Domain.active, Grant.active,
                         Policy.active, Capability.active)). \
             count()
