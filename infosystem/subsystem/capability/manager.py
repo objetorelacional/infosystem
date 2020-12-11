@@ -39,8 +39,7 @@ class CreateCapabilities(operation.Operation):
         if not resources:
             raise exception.OperationBadRequest()
 
-        routes = self.manager.api.routes.list(
-            sysadmin=False, bypass=False, active=True)
+        routes = self.manager.api.routes.list(sysadmin=False, active=True)
         capabilities = self.manager.api.capabilities.list(
             application_id=self.application_id)
         routes_without_capabilities = \
