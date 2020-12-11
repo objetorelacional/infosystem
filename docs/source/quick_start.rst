@@ -25,7 +25,7 @@ the following content:
 
   import infosystem
 
-  system = infosystem.System()
+  system = infosystem.SystemFlask()
   system.run()
 
 Now you are ready to launch your API:
@@ -100,7 +100,7 @@ To create the REST urls and proccess them, let's add on our app.py:
 
   todo_subsystem = subsystem.Subsystem(resource=Todo)
 
-  system = infosystem.System(todo_subsystem)
+  system = infosystem.SystemFlask(todo_subsystem)
 
 
 REST urls obey a pattern and the infosystem create all this urls and his
@@ -136,7 +136,7 @@ Now, your app.py looks like:
   todo_subsystem = subsystem.Subsystem(resource=Todo)
 
 
-  system = infosystem.System(todo_subsystem)
+  system = infosystem.SystemFlask(todo_subsystem)
   system.run()
 
 

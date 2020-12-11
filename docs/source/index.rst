@@ -24,7 +24,7 @@ following content:
 
   import infosystem
 
-  system = infosystem.System()
+  system = infosystem.SystemFlask()
   system.run()
 
 Open a terminal and run the following commands:
