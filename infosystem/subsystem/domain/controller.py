@@ -3,7 +3,7 @@ import json
 import flask
 
 from infosystem.common import exception, utils
-from infosystem.common.exception import BadRequest, InfoSystemException
+from infosystem.common.exception import BadRequest
 from infosystem.common.subsystem import controller
 from infosystem.subsystem.image.resource import QualityImage
 
@@ -18,18 +18,16 @@ class Controller(controller.Controller):
         name = flask.request.args.get('name', None)
         if not name:
             raise BadRequest()
-        if name == 'default':
-            e = InfoSystemException()
-            e.status = 403
-            e.message = 'Forbidden'
-            raise e
         return name
 
     def domain_by_name(self):
         try:
             name = self._get_name_in_args()
             domain = self.manager.domain_by_name(domain_name=name)
-            response = {self.resource_wrap: domain.to_dict()}
+            domain_dict = domain.to_dict()
+            if 'settings' in domain_dict.keys():
+                domain_dict.pop('settings')
+            response = {self.resource_wrap: domain_dict}
             return flask.Response(response=json.dumps(response, default=str),
                                   status=200,
                                   mimetype="application/json")
@@ -137,12 +135,12 @@ class Controller(controller.Controller):
                               status=204,
                               mimetype="application/json")
 
-    def create_setting(self, id):
+    def create_settings(self, id):
         try:
             data = flask.request.get_json()
 
-            setting = self.manager.create_setting(id=id, **data)
-            response = {'setting': setting.to_dict()}
+            settings = self.manager.create_settings(id=id, **data)
+            response = {'settings': settings}
 
             return flask.Response(response=utils.to_json(response),
                                   status=201,
@@ -151,16 +149,12 @@ class Controller(controller.Controller):
             return flask.Response(response=exc.message,
                                   status=exc.status)
 
-    def update_setting(self, id1, id2):
-        domain_id = id1
-        setting_id = id2
+    def update_settings(self, id):
         try:
             data = flask.request.get_json()
 
-            setting = self.manager.update_setting(id=domain_id,
-                                                  setting_id=setting_id,
-                                                  **data)
-            response = {'setting': setting.to_dict()}
+            settings = self.manager.update_settings(id=id, **data)
+            response = {'settings': settings}
 
             return flask.Response(response=utils.to_json(response),
                                   status=200,
@@ -169,13 +163,35 @@ class Controller(controller.Controller):
             return flask.Response(response=exc.message,
                                   status=exc.status)
 
-    def remove_setting(self, id1, id2):
-        domain_id = id1
-        setting_id = id2
+    def _get_keys_from_args(self):
+        keys = flask.request.args.get('keys')
+        if not keys:
+            raise exception.BadRequest(
+                'ERRO! The keys parameter was not passed correctly')
+        return list(filter(None, keys.split(',')))
+
+    def remove_settings(self, id):
         try:
-            setting = self.manager.remove_setting(id=domain_id,
-                                                  setting_id=setting_id)
-            response = {'setting': setting.to_dict()}
+            keys = self._get_keys_from_args()
+            kwargs = {'keys': keys}
+
+            settings = self.manager.remove_settings(id=id, **kwargs)
+            response = {'settings': settings}
+
+            return flask.Response(response=utils.to_json(response),
+                                  status=200,
+                                  mimetype="application/json")
+        except exception.InfoSystemException as exc:
+            return flask.Response(response=exc.message,
+                                  status=exc.status)
+
+    def get_domain_settings_by_keys(self, id):
+        try:
+            keys = self._get_keys_from_args()
+            kwargs = {'keys': keys}
+
+            settings = self.manager.get_domain_settings_by_keys(id=id, **kwargs)
+            response = {'settings': settings}
 
             return flask.Response(response=utils.to_json(response),
                                   status=200,

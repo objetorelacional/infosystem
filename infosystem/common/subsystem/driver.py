@@ -77,9 +77,14 @@ class Driver(object):
 
         for key, value in data.items():
             if hasattr(entity, key):
-                setattr(entity, key, value)
+                try:
+                    setattr(entity, key, value)
+                except AttributeError:
+                    raise exception.BadRequest(
+                        f'Error! The attribute {key} is read only')
             else:
-                raise exception.BadRequest()
+                raise exception.BadRequest(
+                    f'Error! The attribute {key} not exists')
 
         session.flush()
         return entity

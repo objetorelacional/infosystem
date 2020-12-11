@@ -3,18 +3,19 @@ from setuptools import setup, find_packages
 REQUIRED_PACKAGES = [
     'apscheduler',
     'flask',
-    'flask-sqlalchemy',
     'flask-rbac',
+    'flask-sqlalchemy',
+    'flask-migrate',
     'gabbi',
     'pika',
     'sparkpost',
-    'celery==4.4.3',
+    'celery',
     'pillow'
 ]
 
 setup(
     name='infosystem',
-    version='0.2.22',
+    version='1.1.0',
     summary='Infosystem Framework',
     url='https://github.com/objetorelacional/infosystem',
     author='Samuel de Medeiros Queiroz, Francois Oliveira',

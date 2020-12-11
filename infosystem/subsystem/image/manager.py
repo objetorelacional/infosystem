@@ -13,7 +13,7 @@ class Create(manager.Create):
         return super().__call__(file=file, **kwargs)
 
     def post(self):
-        tasks.process_image.delay(self.upload_folder, self.entity.filename)
+        tasks.process_image(self.upload_folder, self.entity.filename)
 
 
 class Get(operation.Get):

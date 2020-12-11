@@ -9,7 +9,7 @@ class InfoSystemTest(object):
 
     def setUp(self):
         super(InfoSystemTest, self).setUp()
-        app = infosystem.System()
+        app = infosystem.SystemFlask()
         app.config['TESTING'] = True
         self.app = app.test_client()
 

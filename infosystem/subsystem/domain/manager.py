@@ -16,7 +16,7 @@ class DomainByName(operation.Operation):
             raise exception.NotFound('ERROR! Domain name not found')
         domain = domains[0]
 
-        # Hide user ID from public resources
+        # Hide user ID and settings from public resources
         domain.created_by = None
         domain.updated_by = None
 
@@ -77,6 +77,18 @@ class RemoveLogo(operation.Update):
 
 class Register(operation.Create):
 
+    def _register_domain(self, domain_name, domain_display_name,
+                         application_id, username, email, password):
+        self.domain = self.manager.api.domains.create(
+            application_id=application_id, name=domain_name,
+            display_name=domain_display_name,
+            addresses=[], contacts=[], active=False)
+
+        self.user = self.manager.api.users.create(
+            name=username, email=email, domain_id=self.domain.id, active=False)
+
+        self.manager.api.users.reset(id=self.user.id, password=password)
+
     def pre(self, session, username, email, password,
             domain_name, domain_display_name, application_name):
         self.username = username
@@ -101,20 +113,32 @@ class Register(operation.Create):
         return True
 
     def do(self, session, **kwargs):
-        domain = self.manager.api.domains.create(
-            application_id=self.application.id, name=self.domain_name,
-            display_name=self.domain_display_name, addresses=[], contacts=[],
-            active=False)
-        self.user = self.manager.api.users.create(
-            name=self.username, email=self.email,
-            domain_id=domain.id, active=False)
-        self.manager.api.users.reset(id=self.user.id, password=self.password)
+        domains = self.manager.api.domains.list(name=self.domain_name)
+        if not domains:
+            self._register_domain(
+                self.domain_name, self.domain_display_name, self.application.id,
+                self.username, self.email, self.password)
+        else:
+            domain = domains[0]
+
+            users = self.manager.api.users.list(email=self.email,
+                                                domain_id=domain.id)
+
+            if domain.active:
+                raise exception.BadRequest('Domain already activated')
+
+            if not users or domain.display_name != self.domain_display_name:
+                raise exception.BadRequest('Domain already registered')
+
+            self.user = users[0]
+            self.manager.api.users.reset(id=self.user.id,
+                                         password=self.password)
 
         return True
 
     def post(self):
         # The notification don't be part of transaction must be on post
-        tasks.send_email.delay(self.user.id)
+        tasks.send_email(self.user.id)
 
 
 class Activate(operation.Create):
@@ -145,55 +169,80 @@ class Activate(operation.Create):
         return True
 
 
-class CreateSetting(operation.Update):
+class CreateSettings(operation.Update):
 
     def pre(self, session, id: str, **kwargs) -> bool:
-        self.key = kwargs.get('key', None)
-        self.value = kwargs.get('value', None)
+        self.settings = kwargs
 
-        if not self.key or not self.value:
-            raise exception.BadRequest()
+        if self.settings is None or not self.settings:
+            raise exception.BadRequest("Erro! There is not a setting")
+
         return super().pre(session=session, id=id)
 
     def do(self, session, **kwargs):
-        setting = self.entity.create_setting(self.key, self.value)
+        result = {}
+        for key, value in self.settings.items():
+            new_value = self.entity.create_setting(key, value)
+            result[key] = new_value
         super().do(session)
 
-        return setting
+        return result
 
 
-class UpdateSetting(operation.Update):
+class UpdateSettings(operation.Update):
 
-    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
-        self.setting_id = setting_id
-        self.key = kwargs.get('key', None)
-        self.value = kwargs.get('value', None)
-        if not (self.key and self.value and self.setting_id):
-            raise exception.BadRequest()
+    def pre(self, session, id: str, **kwargs) -> bool:
+        self.settings = kwargs
+        if self.settings is None or not self.settings:
+            raise exception.BadRequest("Erro! There is not a setting")
         return super().pre(session=session, id=id)
 
     def do(self, session, **kwargs):
-        setting = self.entity.update_setting(self.setting_id,
-                                             self.key,
-                                             self.value)
+        result = {}
+        for key, value in self.settings.items():
+            new_value = self.entity.update_setting(key, value)
+            result[key] = new_value
         super().do(session)
 
-        return setting
+        return result
 
 
-class RemoveSetting(operation.Update):
+class RemoveSettings(operation.Update):
 
-    def pre(self, session, id: str, setting_id: str, **kwargs) -> bool:
-        self.setting_id = setting_id
+    def pre(self, session, id: str, **kwargs) -> bool:
+        self.keys = kwargs.get('keys', [])
+        if not self.keys:
+            raise exception.BadRequest('Erro! keys are empty')
         super().pre(session, id=id)
 
         return self.entity.is_stable()
 
     def do(self, session, **kwargs):
-        setting = self.entity.remove_setting(self.setting_id)
+        result = {}
+        for key in self.keys:
+            value = self.entity.remove_setting(key)
+            result[key] = value
         super().do(session=session)
 
-        return setting
+        return result
+
+
+class GetDomainSettingsByKeys(operation.Get):
+
+    def pre(self, session, id, **kwargs):
+        self.keys = kwargs.get('keys', [])
+        if not self.keys:
+            raise exception.BadRequest('Erro! keys are empty')
+        return super().pre(session, id=id)
+
+    def do(self, session, **kwargs):
+        entity = super().do(session=session)
+        settings = {}
+        for key in self.keys:
+            value = entity.settings.get(key, None)
+            if value is not None:
+                settings[key] = value
+        return settings
 
 
 class Manager(manager.Manager):
@@ -206,6 +255,7 @@ class Manager(manager.Manager):
         self.remove_logo = RemoveLogo(self)
         self.register = Register(self)
         self.activate = Activate(self)
-        self.create_setting = CreateSetting(self)
-        self.update_setting = UpdateSetting(self)
-        self.remove_setting = RemoveSetting(self)
+        self.create_settings = CreateSettings(self)
+        self.update_settings = UpdateSettings(self)
+        self.remove_settings = RemoveSettings(self)
+        self.get_domain_settings_by_keys = GetDomainSettingsByKeys(self)

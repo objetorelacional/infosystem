@@ -10,12 +10,6 @@ class Router(router.Router):
     def routes(self):
         return super().routes + [
             {
-                'action': 'createCapabilities',
-                'method': 'POST',
-                'url': self.resource_url + '/capabilities',
-                'callback': self.controller.create_capabilities
-            },
-            {
                 'action': 'getApplicationRoles',
                 'method': 'GET',
                 'url': self.resource_url + '/roles',

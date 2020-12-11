@@ -1,8 +1,6 @@
 import flask
-from typing import Any
 from pika import BlockingConnection, PlainCredentials, \
-                 ConnectionParameters, BasicProperties
-from infosystem.celery import celery
+    ConnectionParameters, BasicProperties
 
 
 class RabbitMQ:
@@ -27,42 +25,48 @@ class RabbitMQ:
 
 class ProducerQueue:
 
-    def __init__(self, exchange, exchange_type):
-        rabbitMQ = RabbitMQ()
-        self.connection = rabbitMQ.connect()
-        self.exchange = exchange
+    def __init__(self):
+        rabbitmq = RabbitMQ()
+        self.connection = rabbitmq.connect()
         self.channel = self.connection.channel()
-        self.channel.exchange_declare(
-            exchange=exchange, exchange_type=exchange_type, durable=True)
 
-    def publish(self, routing_key):
-        body = ""
-        self.channel.basic_publish(
-            exchange=self.exchange, routing_key=routing_key, body=body)
-        self.close()
+    def publish(self, exchange, routing_key, body, properties=None):
+        self.channel.basic_publish(exchange=exchange,
+                                   routing_key=routing_key,
+                                   body=body,
+                                   properties=properties)
 
-    def publish_with_body(self, routing_key, body):
-        self.channel.basic_publish(
-            exchange=self.exchange, routing_key=routing_key, body=body)
-        self.close()
+    def _publish_entity(self, exchange, routing_key, body,
+                        type, priority=None, headers=None):
+        properties = BasicProperties(
+            type=type, priority=priority, headers=headers)
+        self.channel.basic_publish(exchange=exchange,
+                                   routing_key=routing_key,
+                                   body=body,
+                                   properties=properties)
 
-    def publish_body_priority(self, routing_key, body, priority):
-        properties = BasicProperties(priority=priority, type=self.exchange)
-        self.channel.basic_publish(
-            exchange=self.exchange, routing_key=routing_key, body=body,
-            properties=properties)
+    def publish_full_entity(self, exchange, routing_key, body,
+                            type, priority):
+        headers = {'event_type': 'FULL_ENTITY'}
+        self._publish_entity(exchange, routing_key, body,
+                             type, priority, headers)
+
+    def publish_request_entity(self, exchange, routing_key, body,
+                               type, priority):
+        headers = {'event_type': 'REQUEST_ENTITY'}
+        self._publish_entity(exchange, routing_key, body,
+                             type, priority, headers)
+
+    def publish_partial_entity(self, exchange, routing_key, body,
+                               type, priority, event_name):
+        headers = {'event_type': 'PARTIAL_ENTITY', 'event_name': event_name}
+        self._publish_entity(exchange, routing_key, body,
+                             type, priority, headers)
+
+    def run(self, fn, *args):
+        fn(self, *args)
         self.close()
 
     def close(self):
         self.channel.close()
         self.connection.close()
-
-
-@celery.task
-def publish_body_priority(exchange: str,
-                          priority: int,
-                          body: Any,
-                          routing_key: str = '',
-                          type: str = 'topic') -> None:
-    publish = ProducerQueue(exchange, type)
-    publish.publish_body_priority(routing_key, body, priority)

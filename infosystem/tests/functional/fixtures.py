@@ -12,7 +12,7 @@ class Fixture(fixture.GabbiFixture):
     def __init__(self):
         super().__init__()
 
-        self.system = infosystem.System()
+        self.system = infosystem.SystemFlask()
         self.app = self.system.test_client()
 
     @property

@@ -1,3 +1,4 @@
+from celery.app.utils import Settings
 from infosystem.common.subsystem import router
 
 
@@ -8,6 +9,7 @@ class Router(router.Router):
 
     @property
     def routes(self):
+        settings_endpoint = '/settings'
         return super().routes + [
             {
                 'action': 'Get Domain By Name',
@@ -50,24 +52,31 @@ class Router(router.Router):
                 'bypass': True
             },
             {
-                'action': 'Create a setting Domain',
+                'action': 'Create settings on Domain',
                 'method': 'POST',
-                'url': self.resource_url + '/settings',
-                'callback': self.controller.create_setting,
+                'url': self.resource_url + settings_endpoint,
+                'callback': self.controller.create_settings,
                 'bypass': False
             },
             {
-                'action': 'Update a setting Domain',
+                'action': 'Update settings on Domain',
                 'method': 'PUT',
-                'url': self.resource_enum_url + '/settings/<id2>',
-                'callback': self.controller.update_setting,
+                'url': self.resource_url + settings_endpoint,
+                'callback': self.controller.update_settings,
                 'bypass': False
             },
             {
-                'action': 'Remove a setting Domain',
+                'action': 'Remove settings from Domain',
                 'method': 'DELETE',
-                'url': self.resource_enum_url + '/settings/<id2>',
-                'callback': self.controller.remove_setting,
+                'url': self.resource_url + settings_endpoint,
+                'callback': self.controller.remove_settings,
+                'bypass': False
+            },
+            {
+                'action': 'Get settings by keys from Domain',
+                'method': 'GET',
+                'url': self.resource_url + settings_endpoint,
+                'callback': self.controller.get_domain_settings_by_keys,
                 'bypass': False
             }
         ]
