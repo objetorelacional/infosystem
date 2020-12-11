@@ -107,18 +107,35 @@ class Reset(operation.Update):
 
 class Routes(operation.Operation):
 
+    def _get_application_id(self, session, user_id):
+        result_application = session.query(Domain.application_id). \
+            join(User). \
+            filter(User.id == user_id). \
+            first()
+
+        if not result_application.application_id:
+            raise exception.BadRequest(
+                'This user is not associated with any applications')
+
+        return result_application.application_id
+
     def do(self, session, user_id, **kwargs):
+        application_id = self._get_application_id(session, user_id)
+
         routes = session.query(Route). \
             join(Capability). \
-            join(Policy). \
-            join(Grant, Policy.role_id == Grant.role_id). \
-            join(User). \
-            join(Domain,
-                 and_(Domain.application_id == Capability.application_id,
-                      Domain.id == User.domain_id)). \
-            filter(or_(User.id == user_id, Route.bypass),
-                   User.active, Domain.active, Grant.active,
-                   Policy.active, Capability.active, Route.active). \
+            outerjoin(Policy). \
+            outerjoin(Grant, Policy.role_id == Grant.role_id). \
+            outerjoin(User). \
+            outerjoin(Domain,
+                      and_(Domain.application_id == Capability.application_id,
+                           Domain.id == User.domain_id)). \
+            filter(Capability.application_id == application_id,
+                   Capability.active, Route.active,
+                   or_(Route.bypass,
+                       and_(User.id == user_id,
+                            User.active, Domain.active, Grant.active,
+                            Policy.active))). \
             distinct(). \
             all()
 
@@ -138,7 +155,7 @@ class Authorization(operation.Operation):
                       Capability.application_id == Domain.application_id,
                       Capability.route_id == route.id)). \
             filter(and_(User.id == user_id,
-                        or_(not route.sysadmin, Role.name == 'sysadmin'),
+                        or_(not route.sysadmin, Role.name == Role.SYSADMIN),
                         User.active, Domain.active, Grant.active,
                         Policy.active, Capability.active)). \
             count()
@@ -179,7 +196,7 @@ class DeletePhoto(operation.Update):
 class Notify(operation.Operation):
 
     def _get_sysadmin(self):
-        users = self.manager.list(name='sysadmin')
+        users = self.manager.list(name=User.SYSADMIN_USERNAME)
         user = users[0] if users else None
         return user
 
