@@ -155,7 +155,7 @@ class Authorization(operation.Operation):
                       Capability.application_id == Domain.application_id,
                       Capability.route_id == route.id)). \
             filter(and_(User.id == user_id,
-                        or_(not route.sysadmin, Role.name == 'sysadmin'),
+                        or_(not route.sysadmin, Role.name == Role.SYSADMIN),
                         User.active, Domain.active, Grant.active,
                         Policy.active, Capability.active)). \
             count()
@@ -196,7 +196,7 @@ class DeletePhoto(operation.Update):
 class Notify(operation.Operation):
 
     def _get_sysadmin(self):
-        users = self.manager.list(name='sysadmin')
+        users = self.manager.list(name=User.SYSADMIN_USERNAME)
         user = users[0] if users else None
         return user
 
