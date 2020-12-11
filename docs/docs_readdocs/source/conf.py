@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'InfoSystem'
-copyright = '2020, François Oliveira'
-author = 'François Oliveira'
+copyright = '2020, Objeto Relacional'
+author = 'Objeto Relacional'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
