@@ -14,7 +14,7 @@ Prerequisites
 A Todo application
 ------------------
 
-At the the of this tutorial, you will learn how to persist data in database,
+In this tutorial, you will learn how to persist data in database,
 how to easily create endpoints and use the security system of infosystem
 provide by default.
 
@@ -86,6 +86,14 @@ into models.
 Creating a route
 ----------------
 
+The infosystem already has some routes ready to give power to the programmer
+during the development of the application. They are:
+
+- /tokens
+
+All routes created by infosystem have already implemented the methods
+GET, POST, PUT, DELETE.
+
 To create the REST urls and proccess them, let's add on our app.py:
 
 .. code-block:: python3
@@ -96,7 +104,7 @@ To create the REST urls and proccess them, let's add on our app.py:
 
 
 REST urls obey a pattern and the infosystem create all this urls and his
-controllers. You just need to pass the entity and it's done.
+controllers. You just need to pass the entity to subsystem object and it's done.
 
 Now, your app.py looks like:
 
@@ -132,6 +140,11 @@ Now, your app.py looks like:
   system.run()
 
 
+Your new url point is now acessible by "http://127.0.0.1:5000/todos".
+
+The route names are created by the following logic: model_name + 's'
+
+
 Security
 --------
 
@@ -142,8 +155,8 @@ a user named sysadmin and through it you will get the token.
 
 .. note::
 
-  In production, it's not recommended to change the password and the name
-  of sysadmin for security concerns.
+  In a production enviroment, it is higly recommended to change the password and the name
+  of the sysadmin user for security concerns.
 
 To get the token:
 
@@ -202,7 +215,7 @@ of the model you want to insert:
 .. code-block:: bash
 
   $ curl -s http://127.0.0.1:5000/todos -H 'Content-Type: application/json' -H 'token: 8b439b7c315a47c0962053a671f0456a' --data '{
-    "description": "Job do infosystem"
+    "description": "New feature"
   }' | python -mjson.tool
 
 And the result will be: 
@@ -214,7 +227,7 @@ And the result will be:
           "active": true,
           "created_at": "2020-10-23T11:37:24.349205Z",
           "created_by": "442082c1b6684ce3a5aa972dde6667a9",
-          "description": "Job do infosystem",
+          "description": "New feature",
           "done": false,
           "id": "49c3c5efaca14f4ea30a8a79320c220b"
       }
@@ -234,7 +247,7 @@ The new todo task is there:
   {
     "todos": [
       {
-        "description": "Job do infosystem",
+        "description": "New feature",
         "done": false,
         "id": "49c3c5efaca14f4ea30a8a79320c220b",
         "active": true,
@@ -260,7 +273,7 @@ And the result:
 
   {
     "todo": {
-      "description": "Job do infosystem",
+      "description": "New feature",
       "done": true,
       "id": "49c3c5efaca14f4ea30a8a79320c220b",
       "active": true,
@@ -284,7 +297,7 @@ You will see the change in "done" propertie:
   {
     "todos": [
       {
-          "description": "Job do infosystem",
+          "description": "New feature",
           "done": true,
           "id": "49c3c5efaca14f4ea30a8a79320c220b",
           "active": true,

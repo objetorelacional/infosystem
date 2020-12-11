@@ -59,6 +59,7 @@ every requisition a token provided by itself. To get the token:
         "domain_name": "default"
     }' | python -mjson.tool
 
+
 You will receive a response like this:
 
 .. code-block:: json
