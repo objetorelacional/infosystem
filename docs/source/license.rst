@@ -4,4 +4,4 @@ Licensing
 APACHE License
 --------------
 
-.. include:: ../../../LICENSE
+.. include:: ../LICENSE
