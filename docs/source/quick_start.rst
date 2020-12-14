@@ -25,8 +25,9 @@ the following content:
 
   import infosystem
 
-  system = infosystem.SystemFlask()
-  system.run()
+  app = infosystem.SystemFlask()
+  app.bootstrap()
+  app.run()
 
 Now you are ready to launch your API:
 
@@ -98,13 +99,21 @@ To create the REST urls and proccess them, let's add on our app.py:
 
 .. code-block:: python3
 
-  todo_subsystem = subsystem.Subsystem(resource=Todo)
+  SYSADMIN_RESOURCES = [
+          ('/todos', ['GET', 'POST']),
+          ('/todos/<id>', ['GET', 'PUT', 'DELETE'])
+  ]
 
-  system = infosystem.SystemFlask(todo_subsystem)
+
+  todo_subsystem = subsystem.Subsystem(resource=Todo)
+  todo_system = System(name='Todo', subsystems=[todo_subsystem], sysadmin_resources=SYSADMIN_RESOURCES)
+  app = infosystem.SystemFlask(todo_system)
 
 
 REST urls obey a pattern and the infosystem create all this urls and his
 controllers. You just need to pass the entity to subsystem object and it's done.
+It is also necessary to inform the infosystem of the routes and the methods
+allowed to be accessed.
 
 Now, your app.py looks like:
 
@@ -112,6 +121,7 @@ Now, your app.py looks like:
 
   import infosystem
 
+  from infosystem.system import System
   from infosystem.database import db
   from infosystem.common import subsystem
 
@@ -133,11 +143,18 @@ Now, your app.py looks like:
           self.done = done
 
 
+  SYSADMIN_RESOURCES = [
+          ('/todos', ['GET', 'POST']),
+          ('/todos/<id>', ['GET', 'PUT', 'DELETE'])
+  ]
+
+
   todo_subsystem = subsystem.Subsystem(resource=Todo)
+  todo_system = System(name='Todo', subsystems=[todo_subsystem], sysadmin_resources=SYSADMIN_RESOURCES)
+  app = infosystem.SystemFlask(todo_system)
 
-
-  system = infosystem.SystemFlask(todo_subsystem)
-  system.run()
+  app.bootstrap()
+  app.run()
 
 
 Your new url point is now acessible by "http://127.0.0.1:5000/todos".
@@ -191,7 +208,7 @@ Let's check with a GET on our TODO url:
 
 .. code-block:: bash
 
-  $ curl -s http://127.0.0.1:5000/todos -H 'Content-Type: application/json' -H 'token: 8b439b7c315a47c0962053a671f0456a' | python -mjson.too
+  $ curl -s http://127.0.0.1:5000/todos -H 'Content-Type: application/json' -H 'token: 8b439b7c315a47c0962053a671f0456a' | python -mjson.tool
 
 And we will receive a response:
 
