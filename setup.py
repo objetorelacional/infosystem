@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from infosystem._version import version
 
 REQUIRED_PACKAGES = [
     'apscheduler',
@@ -15,7 +16,7 @@ REQUIRED_PACKAGES = [
 
 setup(
     name='infosystem',
-    version='1.1.1',
+    version=version,
     summary='Infosystem Framework',
     url='https://github.com/objetorelacional/infosystem',
     author='Samuel de Medeiros Queiroz, Francois Oliveira',

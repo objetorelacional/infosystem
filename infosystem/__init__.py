@@ -9,6 +9,7 @@ from infosystem import celery
 from infosystem.bootstrap import Bootstrap
 from infosystem.common.input import InputResourceUtils
 from infosystem.system import System
+from infosystem._version import version as infosystem_version
 
 from infosystem.resources import SYSADMIN_EXCLUSIVE_POLICIES, \
     SYSADMIN_RESOURCES, USER_RESOURCES
@@ -72,7 +73,7 @@ class SystemFlask(flask.Flask):
         pass
 
     def version(self):
-        return '1.0.0'
+        return infosystem_version
 
     def schedule_jobs(self):
         pass
