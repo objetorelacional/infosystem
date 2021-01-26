@@ -42,9 +42,9 @@ class Operation(object):
                 # raise exception.FatalError
                 print('ERRO! SESSION COUNT COULD NOT BE -1')
 
-            self.post()
             if session.count == 0:
                 session.commit()
+            self.post()
         except sqlalchemy.exc.IntegrityError as e:
             session.rollback()
             session.count -= 1
