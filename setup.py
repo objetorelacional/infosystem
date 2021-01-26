@@ -15,7 +15,7 @@ REQUIRED_PACKAGES = [
 
 setup(
     name='infosystem',
-    version='1.1.1',
+    version='1.1.2',
     summary='Infosystem Framework',
     url='https://github.com/objetorelacional/infosystem',
     author='Samuel de Medeiros Queiroz, Francois Oliveira',
